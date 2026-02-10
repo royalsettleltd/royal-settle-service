@@ -1,4 +1,4 @@
-package dev.gracie.movies.transaction.model;
+package africa.royalsettle.transaction.model;
 
 
 public enum TransactionStatus {

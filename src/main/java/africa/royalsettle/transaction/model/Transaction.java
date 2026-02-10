@@ -1,7 +1,5 @@
-package dev.gracie.movies.transaction.model;
-
-import dev.gracie.movies.thrift.model.User;
-import dev.gracie.movies.wallet.model.Wallet;
+package africa.royalsettle.transaction.model;
+import africa.royalsettle.thrift.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,13 +17,15 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "wallet_id", nullable = false)
-    private Wallet wallet;
+//    @ManyToOne
+//    @JoinColumn(name = "wallet_id", nullable = false)
+//    private Wallet wallet;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    private String rsReference;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 50, nullable = false)
