@@ -39,3 +39,4 @@ logs/**/*
 
 mvnw
 mvnw.cmd
+.env
