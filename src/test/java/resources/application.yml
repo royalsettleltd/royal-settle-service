@@ -1,3 +1,71 @@
+server:
+  port: 0
+  servlet:
+    context-path: /api/v1/royal-settle
+
 spring:
+  application:
+    name: royal-settle-service
   profiles:
     default: test
+
+  mail:
+    host: localhost
+    port: 1025
+    username: test
+    password: test
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+            required: false
+
+  datasource:
+    url: jdbc:h2:mem:royal-settle-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    open-in-view: false
+    show-sql: false
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: false
+        transaction:
+          jta:
+            platform: org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform
+
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+  task:
+    scheduling:
+      pool:
+        size: 1
+    execution:
+      pool:
+        core-size: 1
+        max-size: 2
+        queue-capacity: 50
+        keep-alive: 30s
+
+logging:
+  level:
+    root: WARN
+    org.springframework.web: WARN
+    org.hibernate.SQL: WARN
+    africa.royalsettle: WARN
+
+jwt:
+  secret: ${JWT_SECRET:test-secret-please-override-in-ci}
+  expiration: ${JWT_EXPIRATION:86400000}
+  refresh:
+    expiration: ${JWT_REFRESH_EXPIRATION:604800000}
