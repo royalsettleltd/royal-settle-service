@@ -2,14 +2,19 @@ FROM maven:3.8.4-openjdk-17-slim AS build
 
 WORKDIR /app
 
+# Copy only pom.xml first for better layer caching
 COPY pom.xml ./
-COPY .mvn/ .mvn
-RUN chmod +x mvnw && ./mvnw dependency:resolve
 
+# Download dependencies
+RUN mvn dependency:go-offline -B
+
+# Copy source code
 COPY src ./src
-RUN ./mvnw clean package -DskipTests
 
-# Use the official Eclipse Temurin image (successor to OpenJDK)
+# Build the application
+RUN mvn clean package -DskipTests
+
+# Use Eclipse Temurin for the runtime
 FROM eclipse-temurin:17-jdk-jammy
 
 WORKDIR /app
