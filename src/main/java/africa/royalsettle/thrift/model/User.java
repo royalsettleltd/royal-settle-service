@@ -1,12 +1,14 @@
 package africa.royalsettle.thrift.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 //@RequiredArgsConstructor
 @Entity
+@Data
 @Table(name = "users")
 public class User {
     @Id
@@ -24,6 +26,8 @@ public class User {
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
+    private String createdBy;
+    private boolean isKycVerified;
     @Column(name = "phone_number", nullable = false, unique = true, length = 20)
     private String phoneNumber;
 
