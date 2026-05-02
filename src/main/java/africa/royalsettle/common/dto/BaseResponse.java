@@ -1,5 +1,6 @@
 package africa.royalsettle.common.dto;
 
+import africa.royalsettle.common.enums.ResponseCode;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

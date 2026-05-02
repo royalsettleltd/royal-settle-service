@@ -20,6 +20,10 @@ public class Users extends BaseEntity {
     @Column(nullable = false, unique = true, length = 120)
     private String username;
 
+    private String firstName;
+
+    private String lastName;
+
     @Column(nullable = false)
     private String password;
 
@@ -34,6 +38,8 @@ public class Users extends BaseEntity {
 
     @Column(nullable = false)
     private boolean credentialsNonExpired = true;
+
+    private boolean kycVerified;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserRole> roles = new HashSet<>();

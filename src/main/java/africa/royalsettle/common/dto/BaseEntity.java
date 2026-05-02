@@ -19,9 +19,9 @@ import java.util.Objects;
 public class BaseEntity extends BaseEntityNoId {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @EqualsAndHashCode.Include
-    private Long id;
+    private String id;
 
     @Override
     public boolean equals(Object object) {

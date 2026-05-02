@@ -1,19 +1,20 @@
 package africa.royalsettle.ajo.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import africa.royalsettle.common.dto.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@RequiredArgsConstructor
+@Table
 @Entity
-public class AjoContribution {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+@Builder
+@AllArgsConstructor
+public class AjoContribution extends BaseEntity {
 
     private String ajoMemberId;
 

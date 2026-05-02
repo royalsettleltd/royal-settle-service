@@ -1,33 +1,39 @@
 package africa.royalsettle.ajo.models;
 
-import africa.royalsettle.thrift.model.User;
+import africa.royalsettle.common.dto.BaseEntity;
+import africa.royalsettle.onboarding.entity.Users;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
-
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
+@Table
 @Entity
-public class AjoMember {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+@Builder
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class AjoMember extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "ajo_id")
     private Ajo ajo;
 
-    // The actual user in the system
-    private String userId;
     private int slotNo;
+
     private Integer payoutPosition;
-    @OneToMany(mappedBy = "member")
+
+    @OneToMany
+    @JoinColumn(name = "ajo_contribution_id")
     private List<AjoContribution> contributions;
-    @OneToOne(mappedBy = "member")
+
+    @OneToOne
+    @JoinColumn(name = "ajo_payout_id")
     private AjoPayout payout;
 
-    public void setUser(User activeUser) {
-    }
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private Users users;
 }

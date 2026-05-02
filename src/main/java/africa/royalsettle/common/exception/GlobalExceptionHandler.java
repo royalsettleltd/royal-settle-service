@@ -1,7 +1,7 @@
 package africa.royalsettle.common.exception;
 
 import africa.royalsettle.common.dto.BaseResponse;
-import africa.royalsettle.common.dto.ResponseCode;
+import africa.royalsettle.common.enums.ResponseCode;
 import africa.royalsettle.common.dto.ResponseUtil;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Objects;
 
-import static africa.royalsettle.common.dto.ResponseCode.BAD_REQUEST;
+import static africa.royalsettle.common.enums.ResponseCode.BAD_REQUEST;
 
 @RestControllerAdvice
 @RequiredArgsConstructor

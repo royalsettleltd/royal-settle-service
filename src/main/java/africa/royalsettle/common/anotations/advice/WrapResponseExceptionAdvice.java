@@ -3,7 +3,7 @@ package africa.royalsettle.common.anotations.advice;
 import africa.royalsettle.common.anotations.IgnoreWrapResponse;
 import africa.royalsettle.common.anotations.WrapResponse;
 import africa.royalsettle.common.dto.BaseResponse;
-import africa.royalsettle.common.dto.ResponseCode;
+import africa.royalsettle.common.enums.ResponseCode;
 import africa.royalsettle.common.dto.ResponseUtil;
 import africa.royalsettle.common.exception.GlobalExceptionHandler;
 import org.springframework.lang.NonNull;

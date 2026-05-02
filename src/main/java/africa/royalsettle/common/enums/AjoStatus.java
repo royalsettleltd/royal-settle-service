@@ -1,4 +1,4 @@
-package africa.royalsettle.ajo.models;
+package africa.royalsettle.common.enums;
 
 public enum AjoStatus {
     ALL,

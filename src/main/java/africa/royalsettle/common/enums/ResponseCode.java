@@ -1,4 +1,4 @@
-package africa.royalsettle.common.dto;
+package africa.royalsettle.common.enums;
 
 import lombok.Getter;
 

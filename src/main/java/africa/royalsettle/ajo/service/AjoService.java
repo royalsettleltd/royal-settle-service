@@ -1,15 +1,15 @@
 package africa.royalsettle.ajo.service;
 
 import africa.royalsettle.ajo.dto.CreateAjoRequest;
-import africa.royalsettle.ajo.models.*;
+import africa.royalsettle.ajo.models.Ajo;
+import africa.royalsettle.ajo.models.AjoMember;
 import africa.royalsettle.ajo.repository.AjoMemberRepository;
 import africa.royalsettle.ajo.repository.AjoRepository;
-import africa.royalsettle.thrift.model.User;
-import lombok.AllArgsConstructor;
+import africa.royalsettle.common.enums.AjoStatus;
+import africa.royalsettle.onboarding.entity.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -17,8 +17,9 @@ import java.util.UUID;
 public class AjoService {
     private final AjoRepository ajoRepository;
     private final AjoMemberRepository ajoMemberRepository;
+    private static final int MAX_AJO_SLOT = 10;
 
-    public Ajo createAjo(CreateAjoRequest request){
+    public Ajo createAjo(CreateAjoRequest request) {
         //KYC First before creating ajo
         Ajo ajo = new Ajo();
         ajo.setName(request.getName());
@@ -29,46 +30,45 @@ public class AjoService {
         //completed. Min of 3, max of 10.
         ajo.setStatus(AjoStatus.PENDING);
         ajo.setCreatedBy(request.getCreatedBy());
-        ajo.setCreatedAt(LocalDateTime.now());
 
-      return ajoRepository.save(ajo);
+        return ajoRepository.save(ajo);
     }
 
-public String inviteToAjo (String ajoId){
-Ajo ajo = ajoRepository.findById(ajoId).orElseThrow(()-> new RuntimeException("Ajo not found!"));
-if (ajo.getCode()==null){
-    generateAjoCode();
-    ajoRepository.save(ajo);
-}
-return "https://royalsettle.app/join-ajo?code=" + ajo.getCode();
-}
+    public String inviteToAjo(String ajoId) {
+        Ajo ajo = ajoRepository.findById(ajoId).orElseThrow(() -> new RuntimeException("Ajo not found!"));
+        if (ajo.getCode() == null) {
+            generateAjoCode();
+            ajoRepository.save(ajo);
+        }
+        return "https://royalsettle.app/join-ajo?code=" + ajo.getCode();
+    }
 
-public String joinAjo(String code, User activeUser){
-        if(activeUser == null){
+    public String joinAjo(String code, Users activeUser) {
+        if (activeUser == null) {
             throw new RuntimeException("Please,You need to Sign Up and Log in");
         }
-        if(!activeUser.isKycVerified()){
-            throw  new RuntimeException("User must complete Kyc before Joining ajo");
+        if (!activeUser.isKycVerified()) {
+            throw new RuntimeException("User must complete Kyc before Joining ajo");
         }
 
-        Ajo ajo = ajoRepository.findByCode(code).orElseThrow(()-> new RuntimeException("Code not valid"));
-        boolean alreadyAMember = ajoMemberRepository.existByAjoAndUser(ajo,activeUser);
+        Ajo ajo = ajoRepository.findByCode(code).orElseThrow(() -> new RuntimeException("Code not valid"));
+        boolean alreadyAMember = ajoMemberRepository.existsByAjoAndUsers(ajo, activeUser);
 
-        if(alreadyAMember){
+        if (alreadyAMember) {
             throw new RuntimeException("User Already Joined this Ajo");
         }
         long memberCount = ajoMemberRepository.countAjoMember(ajo);
-        if(memberCount < ajo.MAX_AJO_SLOT){
+        if (memberCount < MAX_AJO_SLOT) {
             AjoMember member = new AjoMember();
             member.setAjo(ajo);
-            member.setUserId(activeUser.getId());
+            member.setUsers(activeUser);
             ajoMemberRepository.save(member);
         }
-    return activeUser.getLastName() + activeUser.getLastName() + "Successfully joined Ajo" + ajo.getCode();
-}
+        return activeUser.getLastName() + activeUser.getLastName() + "Successfully joined Ajo" + ajo.getCode();
+    }
 
-private String generateAjoCode(){
-        String random = UUID.randomUUID().toString().substring(0,6).toUpperCase();
+    private String generateAjoCode() {
+        String random = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
         return "RSAJ-" + random;
-}
+    }
 }

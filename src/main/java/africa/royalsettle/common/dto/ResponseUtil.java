@@ -1,5 +1,6 @@
 package africa.royalsettle.common.dto;
 
+import africa.royalsettle.common.enums.ResponseCode;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

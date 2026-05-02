@@ -1,4 +1,4 @@
-package africa.royalsettle.thrift.model;
+package africa.royalsettle.common.enums;
 
 public enum ThriftContributionStatus {
     PENDING,

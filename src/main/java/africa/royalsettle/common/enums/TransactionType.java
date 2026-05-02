@@ -1,4 +1,4 @@
-package africa.royalsettle.transaction.model;
+package africa.royalsettle.common.enums;
 
 public enum TransactionType {
     CREDIT,

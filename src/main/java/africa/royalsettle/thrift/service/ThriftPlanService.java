@@ -1,10 +1,13 @@
 package africa.royalsettle.thrift.service;
+import africa.royalsettle.common.enums.ThriftContributionStatus;
+import africa.royalsettle.onboarding.entity.Users;
+import africa.royalsettle.onboarding.repository.UsersRepository;
 import africa.royalsettle.thrift.dto.*;
 import africa.royalsettle.thrift.model.*;
 import africa.royalsettle.thrift.repository.*;
 import africa.royalsettle.transaction.model.Transaction;
-import africa.royalsettle.transaction.model.TransactionStatus;
-import africa.royalsettle.transaction.model.TransactionType;
+import africa.royalsettle.common.enums.TransactionStatus;
+import africa.royalsettle.common.enums.TransactionType;
 import africa.royalsettle.transaction.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
@@ -27,7 +29,7 @@ public class ThriftPlanService {
     @Autowired
 
     private TransactionRepository transactionRepository;
-    private final UserRepository userRepository;
+    private final UsersRepository userRepository;
     private static final String BANK_NAME = "Royalsettle";
     private static final String ACCOUNT_NUMBER = "1234567890";
     public ThriftPlanResponse createThriftPlan(ThriftPlanRequest payload) {
@@ -71,7 +73,7 @@ public class ThriftPlanService {
 
     public SendThriftResponse sendThrift(SendThriftRequest request) {
 
-        User user = userRepository.findById(request.getUserId())
+        Users user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         ThriftPlan plan = thriftPlanRepository.findById(request.getThriftPlanId())
