@@ -1,18 +1,21 @@
 package africa.royalsettle.ajo.models;
 
+import africa.royalsettle.common.enums.PayoutStatus;
+import africa.royalsettle.common.dto.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
+@Table
 @Entity
-public class AjoPayout {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+@Builder
+@AllArgsConstructor
+public class AjoPayout extends BaseEntity {
 
     @OneToOne
     @JoinColumn(name = "member_id", nullable = false)
@@ -30,12 +33,4 @@ public class AjoPayout {
 
     @Enumerated(EnumType.STRING)
     private PayoutStatus status;
-
-    private String createdBy;
-
-    private LocalDateTime createdAt;
-
-    private String updatedBy;
-
-    private LocalDateTime updatedAt;
 }

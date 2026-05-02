@@ -1,20 +1,23 @@
 package africa.royalsettle.thrift.model;
+
+import africa.royalsettle.common.dto.BaseEntity;
+import africa.royalsettle.onboarding.entity.Users;
 import africa.royalsettle.transaction.model.Transaction;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Getter
+@Setter
+@RequiredArgsConstructor
+@Table
 @Entity
-@Data
-@Table(name = "thrift_plan")
-public class ThriftPlan {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
-
+@Builder
+@AllArgsConstructor
+public class ThriftPlan extends BaseEntity {
 
     @Column(name = "plan_name", nullable = false)
     private String planName;
@@ -37,14 +40,12 @@ public class ThriftPlan {
     @Column(name = "description", length = 255)
     private String description;
 
-
-    // Optional relationship: A plan has many (transactions)
     @OneToMany
     private List<Transaction> transactions;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;  // Owner of the plan
+    private Users user;  // Owner of the plan
 
     @OneToMany(mappedBy = "thriftPlan", cascade = CascadeType.ALL)
     private List<ThriftContribution> contributions;

@@ -1,29 +1,27 @@
 package africa.royalsettle.transaction.model;
-import africa.royalsettle.thrift.model.User;
+
+import africa.royalsettle.common.dto.BaseEntity;
+import africa.royalsettle.common.enums.TransactionStatus;
+import africa.royalsettle.common.enums.TransactionType;
+import africa.royalsettle.onboarding.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;
 
-
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-@Entity
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-//@RequiredArgsConstructor
-@Table(name = "transactions")
-public class Transaction {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
 
-//    @ManyToOne
-//    @JoinColumn(name = "wallet_id", nullable = false)
-//    private Wallet wallet;
+@Getter
+@Setter
+@RequiredArgsConstructor
+@Table
+@Entity
+@Builder
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class Transaction extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Users user;
 
     private String rsReference;
 
@@ -40,8 +38,5 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     @Column(length = 50, nullable = false)
     private TransactionStatus status;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
 }
 
