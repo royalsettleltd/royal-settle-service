@@ -34,7 +34,7 @@ public class AjoService {
         return ajoRepository.save(ajo);
     }
 
-    public String inviteToAjo(String ajoId) {
+    public String inviteToAjo(Long ajoId) {
         Ajo ajo = ajoRepository.findById(ajoId).orElseThrow(() -> new RuntimeException("Ajo not found!"));
         if (ajo.getCode() == null) {
             generateAjoCode();

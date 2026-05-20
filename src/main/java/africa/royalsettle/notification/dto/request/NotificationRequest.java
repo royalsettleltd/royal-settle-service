@@ -1,4 +1,4 @@
-package africa.royalsettle.notification.dto;
+package africa.royalsettle.notification.dto.request;
 
 import africa.royalsettle.notification.dto.enums.NotificationType;
 import lombok.AllArgsConstructor;

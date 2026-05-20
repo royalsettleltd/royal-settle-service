@@ -10,10 +10,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static africa.royalsettle.common.enums.ResponseCode.BAD_REQUEST;
 
@@ -127,6 +130,28 @@ public class GlobalExceptionHandler {
         return responseUtil.buildErrorResponse(ACCESS_DENIED, e, httpServletRequest);
     }
 
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public BaseResponse handleAuthenticationException(AuthenticationException e) {
+        var response = new BaseResponse();
+        response.setResponseCode(ResponseCode.UNAUTHORIZED.getCode());
+        response.setResponseMessage("Invalid username or password");
+        response.setRequestSuccessful(false);
+        response.setStatus(HttpStatus.UNAUTHORIZED.toString());
+        return response;
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public BaseResponse handleIllegalArgumentException(IllegalArgumentException e) {
+        var response = new BaseResponse();
+        response.setResponseCode(BAD_REQUEST.getCode());
+        response.setResponseMessage(e.getMessage());
+        response.setRequestSuccessful(false);
+        response.setStatus(HttpStatus.BAD_REQUEST.toString());
+        return response;
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public BaseResponse handleException(Exception e) {
@@ -156,6 +181,22 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public BaseResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("MethodArgumentNotValidException: ", e);
+
+        var response = new BaseResponse();
+        response.setResponseCode(BAD_REQUEST.getCode());
+        response.setResponseMessage(e.getBindingResult().getFieldErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining(", ")));
+        response.setRequestSuccessful(false);
+        response.setStatus(HttpStatus.BAD_REQUEST.toString());
+        return response;
+    }
+
+
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public BaseResponse handleBadRequestException(BadRequestException e) {
+        log.error("BadRequestException: ", e);
 
         var response = new BaseResponse();
         response.setResponseCode(BAD_REQUEST.getCode());

@@ -56,7 +56,7 @@ public class ThriftPlanService {
     }
 
 
-    public ThriftPlanResponse getThriftPlanById(String planId) {
+    public ThriftPlanResponse getThriftPlanById(Long planId) {
 
         ThriftPlan plan = thriftPlanRepository.findById(planId)
                 .orElseThrow(() -> new RuntimeException("Thrift plan not found"));

@@ -1,7 +1,7 @@
 package africa.royalsettle.notification.service.impl;
 
-import africa.royalsettle.notification.dto.NotificationRequest;
-import africa.royalsettle.notification.dto.TermiiRequest;
+import africa.royalsettle.notification.dto.request.NotificationRequest;
+import africa.royalsettle.notification.dto.request.TermiiRequest;
 import africa.royalsettle.notification.service.SmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

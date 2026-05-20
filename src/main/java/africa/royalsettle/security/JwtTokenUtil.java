@@ -19,6 +19,10 @@ import java.util.function.Function;
 @Slf4j
 public class JwtTokenUtil {
 
+    private static final String TOKEN_TYPE_CLAIM = "tokenType";
+    private static final String ACCESS_TOKEN_TYPE = "access";
+    private static final String REFRESH_TOKEN_TYPE = "refresh";
+
     @Value("${jwt.secret}")
     private String secret;
 
@@ -61,11 +65,13 @@ public class JwtTokenUtil {
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", userDetails.getAuthorities());
+        claims.put(TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE);
         return createToken(claims, userDetails.getUsername(), expiration);
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put(TOKEN_TYPE_CLAIM, REFRESH_TOKEN_TYPE);
         return createToken(claims, userDetails.getUsername(), refreshExpiration);
     }
 
@@ -98,6 +104,16 @@ public class JwtTokenUtil {
             log.error("JWT claims string is empty");
         }
         return false;
+    }
+
+    public Boolean isAccessToken(String token) {
+        String tokenType = extractClaim(token, claims -> claims.get(TOKEN_TYPE_CLAIM, String.class));
+        return tokenType == null || ACCESS_TOKEN_TYPE.equals(tokenType);
+    }
+
+    public Boolean isRefreshToken(String token) {
+        String tokenType = extractClaim(token, claims -> claims.get(TOKEN_TYPE_CLAIM, String.class));
+        return REFRESH_TOKEN_TYPE.equals(tokenType);
     }
 
     public Boolean validateToken(String token) {
