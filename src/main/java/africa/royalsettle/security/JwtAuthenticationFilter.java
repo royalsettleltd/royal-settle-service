@@ -25,6 +25,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
     private final CustomUserDetailsService userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
+    public static final String JWT_REQUEST_ATTRIBUTE = JwtAuthenticationFilter.class.getName() + ".JWT";
     private static final String BEARER = "Bearer ";
 
     @Override
@@ -37,7 +39,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             extractJwtFromRequest(request)
                     .filter(StringUtils::hasText)
+                    .filter(jwt -> !tokenBlacklistService.isBlacklisted(jwt))
                     .filter(jwtTokenUtil::validateToken)
+                    .filter(jwtTokenUtil::isAccessToken)
                     .ifPresent(jwt -> {
                         String username = jwtTokenUtil.extractUsername(jwt);
                         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -47,6 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         );
                         auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(auth);
+                        request.setAttribute(JWT_REQUEST_ATTRIBUTE, jwt);
                     });
         } catch (Exception ex) {
             log.error("Could not set user authentication in security context", ex);

@@ -1,7 +1,7 @@
 package africa.royalsettle.notification.service.impl;
 
-import africa.royalsettle.notification.dto.NotificationAttachment;
-import africa.royalsettle.notification.dto.NotificationRequest;
+import africa.royalsettle.notification.dto.request.NotificationAttachment;
+import africa.royalsettle.notification.dto.request.NotificationRequest;
 import africa.royalsettle.notification.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

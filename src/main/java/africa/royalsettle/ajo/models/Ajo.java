@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Ajo extends BaseEntity {
 
-    private String code;
+    private String ajoCode;
 
     private String name;
 
@@ -25,9 +25,6 @@ public class Ajo extends BaseEntity {
     private AjoStatus status;
 
     private BigDecimal amount;
-
-    @OneToMany(mappedBy = "ajo")
-    private List<AjoMember> members;
 
     private String memberSlot;
 

@@ -25,10 +25,6 @@ public class AjoMember extends BaseEntity {
 
     private Integer payoutPosition;
 
-    @OneToMany
-    @JoinColumn(name = "ajo_contribution_id")
-    private List<AjoContribution> contributions;
-
     @OneToOne
     @JoinColumn(name = "ajo_payout_id")
     private AjoPayout payout;

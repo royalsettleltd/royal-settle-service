@@ -22,7 +22,7 @@ public class ThriftController {
         return ResponseEntity.ok(response);
     }
     @GetMapping("/getPlan/{planId}")
-    public ResponseEntity<ThriftPlanResponse> getThriftPlanById(@PathVariable String planId) {
+    public ResponseEntity<ThriftPlanResponse> getThriftPlanById(@PathVariable Long planId) {
         ThriftPlanResponse response = thriftPlanService.getThriftPlanById(planId);
         return ResponseEntity.ok(response);
     }

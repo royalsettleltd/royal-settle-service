@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AjoContributionRepository extends JpaRepository<AjoContribution, String> {
+public interface AjoContributionRepository extends JpaRepository<AjoContribution, Long> {
 
 }

@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AjoMemberRepository extends JpaRepository<AjoMember, String> {
+public interface AjoMemberRepository extends JpaRepository<AjoMember, Long> {
 
     @Query("SELECT COUNT(m) FROM AjoMember m WHERE m.ajo = :ajo")
     long countAjoMember(Ajo ajo);

@@ -1,5 +1,7 @@
 package africa.royalsettle.common.constants;
 
+import java.time.format.DateTimeFormatter;
+
 public class AppConstant {
 
     private AppConstant() {}
@@ -7,6 +9,10 @@ public class AppConstant {
     public static final String API_BASE = API_VERSION + "/royal-settle";
 
     public static final String[] PUBLIC_URLS = {
+            "/auth/login",
+            "/auth/refresh-token",
+            "/otp/**",
+            "/customer/create-account",
             API_VERSION + "/auth/**",
             API_VERSION + "/public/**",
             "/actuator/health",
@@ -26,4 +32,5 @@ public class AppConstant {
     };
     public static final String ROLE_ADMIN = "ADMIN";
     public static final String ROLE_USER = "USER";
+    public static final DateTimeFormatter CODE_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 }

@@ -1,6 +1,9 @@
 package africa.royalsettle.thrift.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,8 +14,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SendThriftRequest {
 
-    private String userId;
-    private String thriftPlanId;
+    private Long userId;
+    private Long thriftPlanId;
     private BigDecimal amount;
     private LocalDateTime dateTime;
 }
