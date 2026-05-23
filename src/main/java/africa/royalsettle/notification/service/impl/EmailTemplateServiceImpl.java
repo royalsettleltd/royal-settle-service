@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 public class EmailTemplateServiceImpl implements EmailTemplateService {
 
     private static final String OTP_PLACEHOLDER = "{{OTP}}";
-    private static final String OTP_EMAIL_TEMPLATE_PATH = "otp-email.html";
+    private static final String OTP_EMAIL_TEMPLATE_PATH = "templates/otp-email.html";
 
     @Override
     public String buildOtpEmail(String otp) {

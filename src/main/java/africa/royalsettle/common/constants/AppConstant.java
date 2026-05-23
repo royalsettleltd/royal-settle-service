@@ -9,10 +9,10 @@ public class AppConstant {
     public static final String API_BASE = API_VERSION + "/royal-settle";
 
     public static final String[] PUBLIC_URLS = {
-            "/onboarding/login",
-            "/onboarding/signup",
-            "/onboarding/refresh-token",
+            "/auth/login",
+            "/auth/refresh-token",
             "/otp/**",
+            "/customer/create-account",
             API_VERSION + "/auth/**",
             API_VERSION + "/public/**",
             "/actuator/health",

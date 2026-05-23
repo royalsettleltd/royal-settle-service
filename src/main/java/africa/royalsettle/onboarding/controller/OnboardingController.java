@@ -22,30 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Validated
-@RequestMapping("/onboarding")
+@RequestMapping("/customer")
 public class OnboardingController {
 
     private final OnboardingService onboardingService;
 
-    @PostMapping("/login")
-    public LoginResponse login(@RequestBody @Valid LoginRequest request) {
-        return onboardingService.login(request);
-    }
-
-    @PostMapping("/refresh-token")
-    public LoginResponse refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        return onboardingService.refreshToken(request);
-    }
-
-    @PostMapping("/logout")
-    public LogoutResponse logout(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody(required = false) LogoutRequest request
-    ) {
-        return onboardingService.logout(authorizationHeader, request);
-    }
-
-    @PostMapping("/signup")
+    @PostMapping("/create-account")
     public SignupResponse signup(@Valid @RequestBody SignupRequest request) {
         return onboardingService.signup(request);
     }

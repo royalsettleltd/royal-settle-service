@@ -14,7 +14,6 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
 public class Users extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 120)

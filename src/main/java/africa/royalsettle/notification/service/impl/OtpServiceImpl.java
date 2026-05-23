@@ -7,27 +7,30 @@ import africa.royalsettle.notification.service.SmsService;
 import africa.royalsettle.notification.dto.response.OtpResponse;
 import africa.royalsettle.notification.dto.request.OtpSendRequest;
 import africa.royalsettle.notification.dto.request.OtpVerifyRequest;
+import africa.royalsettle.notification.model.OtpToken;
+import africa.royalsettle.notification.repository.OtpTokenRepository;
 import africa.royalsettle.notification.service.EmailTemplateService;
 import africa.royalsettle.notification.service.OtpService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.Duration;
-import java.util.Objects;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class OtpServiceImpl implements OtpService {
 
     private static final Duration OTP_TTL = Duration.ofMinutes(10);
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-    private static final String OTP_KEY_PREFIX = "otp:";
 
-    private final StringRedisTemplate redisTemplate;
+    private final OtpTokenRepository otpTokenRepository;
     private final EmailService emailService;
     private final EmailTemplateService emailTemplateService;
     private final SmsService smsService;
@@ -40,7 +43,15 @@ public class OtpServiceImpl implements OtpService {
         String recipient = validateRecipient(request.getNotificationType(), request.recipient());
         String otp = generateOtp();
 
-        redisTemplate.opsForValue().set(buildKey(request.getNotificationType(), recipient), otp, OTP_TTL);
+        otpTokenRepository.deleteByExpiresAtBefore(LocalDateTime.now());
+        otpTokenRepository.deleteByNotificationTypeAndRecipient(request.getNotificationType(), recipient);
+        otpTokenRepository.save(OtpToken.builder()
+                .notificationType(request.getNotificationType())
+                .recipient(recipient)
+                .otp(otp)
+                .expiresAt(LocalDateTime.now().plus(OTP_TTL))
+                .build());
+
         sendNotification(request.getNotificationType(), recipient, otp);
 
         return OtpResponse.builder()
@@ -52,14 +63,16 @@ public class OtpServiceImpl implements OtpService {
     @Override
     public OtpResponse verifyOtp(OtpVerifyRequest request) {
         String recipient = validateRecipient(request.getNotificationType(), request.recipient());
-        String key = buildKey(request.getNotificationType(), recipient);
-        String savedOtp = redisTemplate.opsForValue().get(key);
+        OtpToken otpToken = otpTokenRepository
+                .findFirstByNotificationTypeAndRecipientAndOtpAndExpiresAtAfterOrderByIdDesc(
+                        request.getNotificationType(),
+                        recipient,
+                        request.getOtp(),
+                        LocalDateTime.now()
+                )
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or expired OTP"));
 
-        if (!Objects.equals(savedOtp, request.getOtp())) {
-            throw new IllegalArgumentException("Invalid or expired OTP");
-        }
-
-        redisTemplate.delete(key);
+        otpTokenRepository.delete(otpToken);
 
         return OtpResponse.builder()
                 .message("OTP verified successfully")
@@ -77,7 +90,8 @@ public class OtpServiceImpl implements OtpService {
                 : recipient.trim();
     }
 
-    private void sendNotification(NotificationType notificationType, String recipient, String otp) {
+    @Async
+    public void sendNotification(NotificationType notificationType, String recipient, String otp) {
         NotificationRequest request = new NotificationRequest();
         request.setNotificationType(notificationType);
         request.setRecipient(recipient);
@@ -92,10 +106,6 @@ public class OtpServiceImpl implements OtpService {
 
         request.setMessage("Your token is " + otp + ". It expires in 10 minutes.");
         smsService.sendSms(request);
-    }
-
-    private String buildKey(NotificationType notificationType, String recipient) {
-        return OTP_KEY_PREFIX + notificationType.name() + ":" + recipient;
     }
 
     private String generateOtp() {
