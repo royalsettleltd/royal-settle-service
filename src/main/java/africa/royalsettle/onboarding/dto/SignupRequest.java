@@ -9,9 +9,13 @@ import lombok.Data;
 @Data
 public class SignupRequest {
 
-    @NotBlank(message = "fullName is required")
-    @Size(max = 150, message = "fullName cannot exceed 150 characters")
-    private String fullName;
+    @NotBlank(message = "firstName is required")
+    @Size(max = 75, message = "firstName cannot exceed 75 characters")
+    private String firstName;
+
+    @NotBlank(message = "lastName is required")
+    @Size(max = 75, message = "lastName cannot exceed 75 characters")
+    private String lastName;
 
     @NotBlank(message = "emailAddress is required")
     @Email(message = "emailAddress must be valid")
@@ -26,6 +30,5 @@ public class SignupRequest {
     @Size(min = 8, max = 100, message = "password must be between 8 and 100 characters")
     private String password;
 
-    @NotBlank(message = "referralCode is required")
     private String referralCode;
 }
