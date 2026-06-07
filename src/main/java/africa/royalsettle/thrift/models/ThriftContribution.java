@@ -1,8 +1,8 @@
-package africa.royalsettle.thrift.model;
+package africa.royalsettle.thrift.models;
 
 import africa.royalsettle.common.dto.BaseEntity;
 import africa.royalsettle.common.enums.ThriftContributionStatus;
-import africa.royalsettle.onboarding.entity.Users;
+import africa.royalsettle.onboarding.models.Users;
 import africa.royalsettle.transaction.model.Transaction;
 import jakarta.persistence.*;
 import lombok.*;

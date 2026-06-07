@@ -2,8 +2,8 @@ package africa.royalsettle.onboarding.service.impl;
 
 import africa.royalsettle.onboarding.dto.SignupRequest;
 import africa.royalsettle.onboarding.dto.SignupResponse;
-import africa.royalsettle.onboarding.entity.UserRole;
-import africa.royalsettle.onboarding.entity.Users;
+import africa.royalsettle.onboarding.models.UserRole;
+import africa.royalsettle.onboarding.models.Users;
 import africa.royalsettle.onboarding.enums.RoleName;
 import africa.royalsettle.onboarding.repository.UsersRepository;
 import africa.royalsettle.onboarding.service.OnboardingService;

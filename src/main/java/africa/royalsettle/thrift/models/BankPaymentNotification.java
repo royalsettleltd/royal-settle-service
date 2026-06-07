@@ -1,4 +1,4 @@
-package africa.royalsettle.thrift.model;
+package africa.royalsettle.thrift.models;
 
 import africa.royalsettle.common.dto.BaseEntity;
 import jakarta.persistence.Entity;

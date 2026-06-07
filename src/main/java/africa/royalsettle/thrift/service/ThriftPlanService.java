@@ -1,9 +1,9 @@
 package africa.royalsettle.thrift.service;
 import africa.royalsettle.common.enums.ThriftContributionStatus;
-import africa.royalsettle.onboarding.entity.Users;
+import africa.royalsettle.onboarding.models.Users;
 import africa.royalsettle.onboarding.repository.UsersRepository;
 import africa.royalsettle.thrift.dto.*;
-import africa.royalsettle.thrift.model.*;
+import africa.royalsettle.thrift.models.*;
 import africa.royalsettle.thrift.repository.*;
 import africa.royalsettle.transaction.model.Transaction;
 import africa.royalsettle.common.enums.TransactionStatus;

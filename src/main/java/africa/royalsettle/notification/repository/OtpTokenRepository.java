@@ -1,7 +1,7 @@
 package africa.royalsettle.notification.repository;
 
 import africa.royalsettle.notification.dto.enums.NotificationType;
-import africa.royalsettle.notification.model.OtpToken;
+import africa.royalsettle.notification.models.OtpToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

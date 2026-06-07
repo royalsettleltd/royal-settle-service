@@ -3,7 +3,7 @@ package africa.royalsettle.transaction.model;
 import africa.royalsettle.common.dto.BaseEntity;
 import africa.royalsettle.common.enums.TransactionStatus;
 import africa.royalsettle.common.enums.TransactionType;
-import africa.royalsettle.onboarding.entity.Users;
+import africa.royalsettle.onboarding.models.Users;
 import jakarta.persistence.*;
 import lombok.*;
 

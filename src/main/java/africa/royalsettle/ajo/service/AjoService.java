@@ -6,7 +6,7 @@ import africa.royalsettle.ajo.models.AjoMember;
 import africa.royalsettle.ajo.repository.AjoMemberRepository;
 import africa.royalsettle.ajo.repository.AjoRepository;
 import africa.royalsettle.common.enums.AjoStatus;
-import africa.royalsettle.onboarding.entity.Users;
+import africa.royalsettle.onboarding.models.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

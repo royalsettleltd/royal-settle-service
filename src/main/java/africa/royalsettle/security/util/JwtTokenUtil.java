@@ -1,10 +1,11 @@
-package africa.royalsettle.security;
+package africa.royalsettle.security.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Component
@@ -22,6 +24,7 @@ public class JwtTokenUtil {
     private static final String TOKEN_TYPE_CLAIM = "tokenType";
     private static final String ACCESS_TOKEN_TYPE = "access";
     private static final String REFRESH_TOKEN_TYPE = "refresh";
+    private static final String SESSION_ID_CLAIM = "sid";
 
     @Value("${jwt.secret}")
     private String secret;
@@ -45,6 +48,14 @@ public class JwtTokenUtil {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    public String extractTokenId(String token) {
+        return extractClaim(token, Claims::getId);
+    }
+
+    public String extractSessionId(String token) {
+        return extractClaim(token, claims -> claims.get(SESSION_ID_CLAIM, String.class));
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -62,16 +73,20 @@ public class JwtTokenUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, String sessionId) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", userDetails.getAuthorities());
+        claims.put("roles", userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList());
         claims.put(TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE);
+        claims.put(SESSION_ID_CLAIM, sessionId);
         return createToken(claims, userDetails.getUsername(), expiration);
     }
 
-    public String generateRefreshToken(UserDetails userDetails) {
+    public String generateRefreshToken(UserDetails userDetails, String sessionId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TOKEN_TYPE_CLAIM, REFRESH_TOKEN_TYPE);
+        claims.put(SESSION_ID_CLAIM, sessionId);
         return createToken(claims, userDetails.getUsername(), refreshExpiration);
     }
 
@@ -81,6 +96,7 @@ public class JwtTokenUtil {
 
         return Jwts.builder()
                 .claims(claims)
+                .id(UUID.randomUUID().toString())
                 .subject(subject)
                 .issuedAt(now)
                 .expiration(expiryDate)
@@ -91,7 +107,10 @@ public class JwtTokenUtil {
     public Boolean validateToken(String token, UserDetails userDetails) {
         try {
             final String username = extractUsername(token);
-            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+            return username.equals(userDetails.getUsername())
+                    && !isTokenExpired(token)
+                    && extractTokenId(token) != null
+                    && extractSessionId(token) != null;
         } catch (SignatureException ex) {
             log.error("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
@@ -108,7 +127,7 @@ public class JwtTokenUtil {
 
     public Boolean isAccessToken(String token) {
         String tokenType = extractClaim(token, claims -> claims.get(TOKEN_TYPE_CLAIM, String.class));
-        return tokenType == null || ACCESS_TOKEN_TYPE.equals(tokenType);
+        return ACCESS_TOKEN_TYPE.equals(tokenType);
     }
 
     public Boolean isRefreshToken(String token) {
@@ -118,11 +137,14 @@ public class JwtTokenUtil {
 
     public Boolean validateToken(String token) {
         try {
-            Jwts.parser()
+            Claims claims = Jwts.parser()
                     .verifyWith(getSigningKey())
                     .build()
-                    .parseSignedClaims(token);
-            return true;
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return claims.getId() != null
+                    && claims.getSubject() != null
+                    && claims.get(SESSION_ID_CLAIM, String.class) != null;
         } catch (Exception ex) {
             log.error("Token validation failed: {}", ex.getMessage());
             return false;

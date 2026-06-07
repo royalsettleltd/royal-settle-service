@@ -16,7 +16,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AjoContribution extends BaseEntity {
 
-    private String ajoMemberId;
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    private AjoMember member;
 
     private BigDecimal amount;
 

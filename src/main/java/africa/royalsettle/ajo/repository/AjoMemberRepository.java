@@ -2,7 +2,7 @@ package africa.royalsettle.ajo.repository;
 
 import africa.royalsettle.ajo.models.Ajo;
 import africa.royalsettle.ajo.models.AjoMember;
-import africa.royalsettle.onboarding.entity.Users;
+import africa.royalsettle.onboarding.models.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

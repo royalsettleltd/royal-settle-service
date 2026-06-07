@@ -27,7 +27,7 @@ public class AjoPayout extends BaseEntity {
 
     private BigDecimal payoutAmount;
 
-    private Integer payoutRound; // Which round in the cycle
+    private Integer payoutRound;
 
     private LocalDateTime payoutDate;
 

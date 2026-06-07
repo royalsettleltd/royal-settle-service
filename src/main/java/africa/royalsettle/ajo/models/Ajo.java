@@ -2,11 +2,11 @@ package africa.royalsettle.ajo.models;
 
 import africa.royalsettle.common.enums.AjoStatus;
 import africa.royalsettle.common.dto.BaseEntity;
+import africa.royalsettle.onboarding.models.Users;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Getter
 @Setter
@@ -31,4 +31,7 @@ public class Ajo extends BaseEntity {
     private String frequency;
 
     private String duration;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private Users users;
 }

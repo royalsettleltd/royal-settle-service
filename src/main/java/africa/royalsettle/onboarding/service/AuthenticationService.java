@@ -9,5 +9,5 @@ public interface AuthenticationService {
 
     LoginResponse refreshToken(RefreshTokenRequest request);
 
-    LogoutResponse logout(HttpServletRequest request);
+    LogoutResponse logout(HttpServletRequest request, LogoutRequest logoutRequest);
 }
