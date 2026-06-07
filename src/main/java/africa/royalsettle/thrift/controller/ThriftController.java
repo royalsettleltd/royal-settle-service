@@ -1,4 +1,5 @@
 package africa.royalsettle.thrift.controller;
+
 import africa.royalsettle.thrift.dto.*;
 import africa.royalsettle.thrift.models.BankPaymentNotification;
 import africa.royalsettle.thrift.service.ThriftPlanService;
@@ -34,6 +35,7 @@ public class ThriftController {
         ThriftPlanResponse response = thriftPlanService.createThriftPlan(request);
         return ResponseEntity.ok(response);
     }
+
     @GetMapping("/getPlan/{planId}")
     @Operation(summary = "Get thrift plan")
     public ResponseEntity<ThriftPlanResponse> getThriftPlanById(
@@ -67,6 +69,6 @@ public class ThriftController {
     @Operation(summary = "Reconcile bank payment")
     public ResponseEntity<ReconcilePaymentResponse> reconcileBankPayment(@RequestBody BankPaymentNotification notification) {
 
-        return ResponseEntity.ok( thriftPlanService.reconcileBankPayment(notification));
+        return ResponseEntity.ok(thriftPlanService.reconcileBankPayment(notification));
     }
 }
