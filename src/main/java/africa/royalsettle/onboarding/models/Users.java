@@ -41,19 +41,24 @@ public class Users extends BaseEntity {
     private String password;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean enabled = true;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean accountNonExpired = true;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean accountNonLocked = true;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean credentialsNonExpired = true;
 
     private boolean kycVerified;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<UserRole> roles = new HashSet<>();
 }

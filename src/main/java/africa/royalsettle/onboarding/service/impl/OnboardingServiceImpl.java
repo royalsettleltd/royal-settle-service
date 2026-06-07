@@ -1,5 +1,6 @@
 package africa.royalsettle.onboarding.service.impl;
 
+import africa.royalsettle.common.exception.BadRequestException;
 import africa.royalsettle.onboarding.dto.SignupRequest;
 import africa.royalsettle.onboarding.dto.SignupResponse;
 import africa.royalsettle.onboarding.models.UserRole;
@@ -8,9 +9,12 @@ import africa.royalsettle.onboarding.enums.RoleName;
 import africa.royalsettle.onboarding.repository.UsersRepository;
 import africa.royalsettle.onboarding.service.OnboardingService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,21 +30,27 @@ public class OnboardingServiceImpl implements OnboardingService {
         String emailAddress = request.getEmailAddress().trim().toLowerCase();
         String phoneNumber = request.getPhoneNumber().trim();
 
-        if (usersRepository.existsByEmailAddress(emailAddress)) {
-            throw new IllegalArgumentException("emailAddress already exists");
+        List<UsersRepository.UserContactProjection> conflicts =
+                usersRepository.findByEmailAddressOrPhoneNumber(emailAddress, phoneNumber);
+
+        if (conflicts.stream().anyMatch(user -> emailAddress.equals(user.getEmailAddress()))) {
+            throw new BadRequestException("emailAddress already exists");
         }
 
-        if (usersRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new IllegalArgumentException("phoneNumber already exists");
+        if (conflicts.stream().anyMatch(user -> phoneNumber.equals(user.getPhoneNumber()))) {
+            throw new BadRequestException("phoneNumber already exists");
         }
 
-        Users user = new Users();
-        user.setUsername(emailAddress);
-        user.setFullName(request.getFullName().trim());
-        user.setEmailAddress(emailAddress);
-        user.setPhoneNumber(phoneNumber);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setReferralCode(request.getReferralCode());
+        Users user = Users.builder()
+                .username(emailAddress)
+                .firstName(request.getFirstName().trim())
+                .lastName(request.getLastName().trim())
+                .fullName(request.getFirstName().trim().concat(" ").concat(request.getLastName().trim()))
+                .emailAddress(emailAddress)
+                .phoneNumber(phoneNumber)
+                .password(passwordEncoder.encode(request.getPassword()))
+                .referralCode(StringUtils.isNotBlank(request.getReferralCode()) ? request.getReferralCode().trim() : null)
+                .build();
 
         UserRole role = UserRole.builder()
                 .name(RoleName.ROYALSETTLE_USER)
