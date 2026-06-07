@@ -1,13 +1,17 @@
 package africa.royalsettle.thrift.service;
+
 import africa.royalsettle.common.enums.ThriftContributionStatus;
+import africa.royalsettle.common.enums.TransactionStatus;
+import africa.royalsettle.common.enums.TransactionType;
 import africa.royalsettle.onboarding.models.Users;
 import africa.royalsettle.onboarding.repository.UsersRepository;
 import africa.royalsettle.thrift.dto.*;
-import africa.royalsettle.thrift.models.*;
-import africa.royalsettle.thrift.repository.*;
+import africa.royalsettle.thrift.models.BankPaymentNotification;
+import africa.royalsettle.thrift.models.ThriftContribution;
+import africa.royalsettle.thrift.models.ThriftPlan;
+import africa.royalsettle.thrift.repository.ThriftContributionRepository;
+import africa.royalsettle.thrift.repository.ThriftPlanRepository;
 import africa.royalsettle.transaction.model.Transaction;
-import africa.royalsettle.common.enums.TransactionStatus;
-import africa.royalsettle.common.enums.TransactionType;
 import africa.royalsettle.transaction.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +36,7 @@ public class ThriftPlanService {
     private final UsersRepository userRepository;
     private static final String BANK_NAME = "Royalsettle";
     private static final String ACCOUNT_NUMBER = "1234567890";
+
     public ThriftPlanResponse createThriftPlan(ThriftPlanRequest payload) {
 //The user should be the currently logged in user when auth is ready
 //        User user = userRepository.findById()
@@ -47,7 +52,7 @@ public class ThriftPlanService {
             plan.setEndDate(payload.getEndDate());
         }
         plan.setDescription(payload.getDescription());
-     //   plan.setUser(user);
+        //   plan.setUser(user);
         plan.setIsCompleted(false);
 
         ThriftPlan savedPlan = thriftPlanRepository.save(plan);
@@ -155,7 +160,6 @@ public class ThriftPlanService {
 
         return response;
     }
-
 
 
     private ThriftPlanResponse mapToResponse(ThriftPlan plan) {

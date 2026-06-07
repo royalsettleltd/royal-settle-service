@@ -16,6 +16,11 @@ public enum ResponseCode {
             "400000",
             "The request could not be completed due to malformed syntax. Kindly crosscheck and try again."),
 
+    // 422xx
+    UNPROCESSABLE_ENTITY(
+            "422000",
+            "The request could not be completed due to unprocessable entity."),
+
     // 401xxx
     UNAUTHORIZED(
             "401000",

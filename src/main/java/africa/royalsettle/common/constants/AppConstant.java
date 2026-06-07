@@ -10,6 +10,9 @@ public class AppConstant {
             "/auth/refresh-token",
             "/otp/**",
             "/customer/create-account",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
             "/actuator/health",
             "/actuator/info"
     };

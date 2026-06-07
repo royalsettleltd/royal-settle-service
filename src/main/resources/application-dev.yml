@@ -84,3 +84,9 @@ security:
 notification:
   otp:
     cleanup-interval: ${OTP_CLEANUP_INTERVAL:PT15M}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
