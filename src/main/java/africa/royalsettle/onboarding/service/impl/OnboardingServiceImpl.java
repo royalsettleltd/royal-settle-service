@@ -6,6 +6,7 @@ import africa.royalsettle.onboarding.dto.SignupResponse;
 import africa.royalsettle.onboarding.models.UserRole;
 import africa.royalsettle.onboarding.models.Users;
 import africa.royalsettle.onboarding.enums.RoleName;
+import africa.royalsettle.onboarding.repository.UserContactProjection;
 import africa.royalsettle.onboarding.repository.UsersRepository;
 import africa.royalsettle.onboarding.service.OnboardingService;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +31,8 @@ public class OnboardingServiceImpl implements OnboardingService {
         String emailAddress = request.getEmailAddress().trim().toLowerCase();
         String phoneNumber = request.getPhoneNumber().trim();
 
-        List<UsersRepository.UserContactProjection> conflicts =
-                usersRepository.findByEmailAddressOrPhoneNumber(emailAddress, phoneNumber);
+        List<UserContactProjection> conflicts =
+                usersRepository.findContactConflicts(emailAddress, phoneNumber);
 
         if (conflicts.stream().anyMatch(user -> emailAddress.equals(user.getEmailAddress()))) {
             throw new BadRequestException("emailAddress already exists");

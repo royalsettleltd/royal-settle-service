@@ -5,6 +5,7 @@ import africa.royalsettle.onboarding.dto.SignupRequest;
 import africa.royalsettle.onboarding.dto.SignupResponse;
 import africa.royalsettle.onboarding.enums.RoleName;
 import africa.royalsettle.onboarding.models.Users;
+import africa.royalsettle.onboarding.repository.UserContactProjection;
 import africa.royalsettle.onboarding.repository.UsersRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +40,7 @@ class OnboardingServiceImplTest {
     @Test
     void createsUserWithNormalizedDetailsAndDefaultRole() {
         SignupRequest request = signupRequest();
-        when(usersRepository.findByEmailAddressOrPhoneNumber(
+        when(usersRepository.findContactConflicts(
                 "user@example.com",
                 "+2348012345678"
         )).thenReturn(List.of());
@@ -69,11 +70,11 @@ class OnboardingServiceImplTest {
     @Test
     void rejectsExistingEmailFromSingleConflictLookup() {
         SignupRequest request = signupRequest();
-        UsersRepository.UserContactProjection conflict = contact(
+        UserContactProjection conflict = contact(
                 "user@example.com",
                 "+2348099999999"
         );
-        when(usersRepository.findByEmailAddressOrPhoneNumber(
+        when(usersRepository.findContactConflicts(
                 "user@example.com",
                 "+2348012345678"
         )).thenReturn(List.of(conflict));
@@ -91,11 +92,11 @@ class OnboardingServiceImplTest {
     @Test
     void rejectsExistingPhoneNumberFromSingleConflictLookup() {
         SignupRequest request = signupRequest();
-        UsersRepository.UserContactProjection conflict = contact(
+        UserContactProjection conflict = contact(
                 "another@example.com",
                 "+2348012345678"
         );
-        when(usersRepository.findByEmailAddressOrPhoneNumber(
+        when(usersRepository.findContactConflicts(
                 "user@example.com",
                 "+2348012345678"
         )).thenReturn(List.of(conflict));
@@ -121,8 +122,8 @@ class OnboardingServiceImplTest {
         return request;
     }
 
-    private UsersRepository.UserContactProjection contact(String emailAddress, String phoneNumber) {
-        return new UsersRepository.UserContactProjection() {
+    private UserContactProjection contact(String emailAddress, String phoneNumber) {
+        return new UserContactProjection() {
             @Override
             public String getEmailAddress() {
                 return emailAddress;

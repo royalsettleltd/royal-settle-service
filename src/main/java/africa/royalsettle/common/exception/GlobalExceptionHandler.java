@@ -1,9 +1,14 @@
 package africa.royalsettle.common.exception;
 
+import africa.royalsettle.common.constants.OpenApiExamples;
 import africa.royalsettle.common.dto.BaseResponse;
-import africa.royalsettle.common.enums.ResponseCode;
 import africa.royalsettle.common.dto.ResponseUtil;
+import africa.royalsettle.common.enums.ResponseCode;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +18,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
@@ -27,6 +33,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static africa.royalsettle.common.enums.ResponseCode.BAD_REQUEST;
+import static africa.royalsettle.common.enums.ResponseCode.UNPROCESSABLE_ENTITY;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
@@ -40,6 +47,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ApiResponse(responseCode = "404", description = "Resource not found",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BaseResponse.class),
+                    examples = @ExampleObject(value = OpenApiExamples.NOT_FOUND)))
     public BaseResponse handleNotFoundException(EntityNotFoundException e) {
 
         String errorMessage = e.getMessage();
@@ -51,6 +62,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ApiResponse(responseCode = "400", description = "Missing request parameter",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BaseResponse.class),
+                    examples = @ExampleObject(value = OpenApiExamples.BAD_REQUEST)))
     public BaseResponse handleMissingServletRequestParameterException(
             MissingServletRequestParameterException e) {
 
@@ -63,6 +78,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ApiResponse(responseCode = "400", description = "Malformed request body",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BaseResponse.class),
+                    examples = @ExampleObject(value = OpenApiExamples.BAD_REQUEST)))
     public BaseResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         String message = extractEnumErrorMessage(e);
         return new BaseResponse(BAD_REQUEST.getCode(), message);
@@ -103,17 +122,25 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnsupportedOperationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ApiResponse(responseCode = "422", description = "Operation not supported",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BaseResponse.class),
+                    examples = @ExampleObject(value = OpenApiExamples.UNPROCESSABLE_ENTITY)))
     public BaseResponse handleUnsupportedOperationException(UnsupportedOperationException e) {
         var response = new BaseResponse();
-        response.setResponseCode(BAD_REQUEST.getCode());
+        response.setResponseCode(UNPROCESSABLE_ENTITY.getCode());
         response.setResponseMessage(e.getMessage());
-        response.setStatus(HttpStatus.BAD_REQUEST.toString());
+        response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.toString());
         return response;
     }
 
     @ExceptionHandler(DataAccessException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
+    @ApiResponse(responseCode = "500", description = "Database operation failed",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BaseResponse.class),
+                    examples = @ExampleObject(value = OpenApiExamples.INTERNAL_SERVER_ERROR)))
     public BaseResponse handleDataAccessException(DataAccessException e) {
         log.error("DataAccessException: ", e);
         var response = new BaseResponse();
@@ -125,13 +152,22 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ApiResponse(responseCode = "403", description = "Forbidden",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BaseResponse.class),
+                    examples = @ExampleObject(value = OpenApiExamples.FORBIDDEN)))
     public BaseResponse handleAccessDeniedException(
             Exception e, HttpServletRequest httpServletRequest) {
-        return responseUtil.buildErrorResponse(ACCESS_DENIED, e, httpServletRequest);
+        return responseUtil.buildErrorResponse(
+                ResponseCode.FORBIDDEN.getCode(), ACCESS_DENIED, e, httpServletRequest);
     }
 
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ApiResponse(responseCode = "401", description = "Authentication failed",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BaseResponse.class),
+                    examples = @ExampleObject(value = OpenApiExamples.UNAUTHORIZED)))
     public BaseResponse handleAuthenticationException(AuthenticationException e) {
         var response = new BaseResponse();
         response.setResponseCode(ResponseCode.UNAUTHORIZED.getCode());
@@ -143,6 +179,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ApiResponse(responseCode = "400", description = "Invalid request argument",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BaseResponse.class),
+                    examples = @ExampleObject(value = OpenApiExamples.BAD_REQUEST)))
     public BaseResponse handleIllegalArgumentException(IllegalArgumentException e) {
         var response = new BaseResponse();
         response.setResponseCode(BAD_REQUEST.getCode());
@@ -154,6 +194,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BaseResponse.class),
+                    examples = @ExampleObject(value = OpenApiExamples.INTERNAL_SERVER_ERROR)))
     public BaseResponse handleException(Exception e) {
         log.error("handling unexpected error: ", e);
         var response = new BaseResponse();
@@ -166,6 +210,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ApiResponse(responseCode = "400", description = "Validation failed",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BaseResponse.class),
+                    examples = @ExampleObject(value = OpenApiExamples.BAD_REQUEST)))
     public BaseResponse handleConstraintViolationException(ConstraintViolationException e) {
         log.error("ConstraintViolationException: ", e);
 
@@ -179,6 +227,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ApiResponse(responseCode = "400", description = "Validation failed",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BaseResponse.class),
+                    examples = @ExampleObject(value = OpenApiExamples.BAD_REQUEST)))
     public BaseResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("MethodArgumentNotValidException: ", e);
 
@@ -195,12 +247,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ApiResponse(responseCode = "400", description = "Bad request",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = BaseResponse.class),
+                    examples = @ExampleObject(value = OpenApiExamples.BAD_REQUEST)))
     public BaseResponse handleBadRequestException(BadRequestException e) {
         log.error("BadRequestException: ", e);
 
         var response = new BaseResponse();
         response.setResponseCode(BAD_REQUEST.getCode());
-        response.setResponseMessage(BAD_REQUEST.getDescription());
+        response.setResponseMessage(StringUtils.defaultIfBlank(e.getMessage(), BAD_REQUEST.getDescription()));
         response.setRequestSuccessful(false);
         response.setStatus(HttpStatus.BAD_REQUEST.toString());
         return response;
