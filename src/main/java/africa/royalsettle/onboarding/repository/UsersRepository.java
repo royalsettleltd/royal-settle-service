@@ -1,6 +1,6 @@
 package africa.royalsettle.onboarding.repository;
 
-import africa.royalsettle.onboarding.entity.Users;
+import africa.royalsettle.onboarding.models.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

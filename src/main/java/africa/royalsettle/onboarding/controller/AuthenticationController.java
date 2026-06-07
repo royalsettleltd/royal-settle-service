@@ -30,7 +30,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    public LogoutResponse logout(HttpServletRequest request) {
-        return authenticationService.logout(request);
+    public LogoutResponse logout(
+            HttpServletRequest request,
+            @Valid @RequestBody LogoutRequest logoutRequest
+    ) {
+        return authenticationService.logout(request, logoutRequest);
     }
 }

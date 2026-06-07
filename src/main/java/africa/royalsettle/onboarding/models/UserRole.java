@@ -1,4 +1,4 @@
-package africa.royalsettle.onboarding.entity;
+package africa.royalsettle.onboarding.models;
 
 import africa.royalsettle.common.dto.BaseEntity;
 import africa.royalsettle.onboarding.enums.RoleName;

@@ -1,6 +1,9 @@
-package africa.royalsettle.security;
+package africa.royalsettle.security.config;
 
+import africa.royalsettle.security.util.JwtAuthenticationEntryPoint;
+import africa.royalsettle.security.util.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,7 +22,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static africa.royalsettle.common.constants.AppConstant.*;
@@ -33,6 +35,9 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Value("${security.cors.allowed-origins:http://localhost:3000}")
+    private List<String> allowedOrigins;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -40,10 +45,11 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_URLS).permitAll()
-                        .requestMatchers(ACTUATOR_URLS).hasRole(ROLE_ADMIN)
-                        .requestMatchers(ADMIN_URLS).hasRole(ROLE_ADMIN)
-                        .requestMatchers(USER_URLS).hasAnyRole(ROLE_USER, ROLE_ADMIN)
-                        .anyRequest().authenticated()
+                        .requestMatchers(ACTUATOR_URLS).hasAuthority(ROLE_ADMIN)
+                        .requestMatchers(ADMIN_URLS).hasAuthority(ROLE_ADMIN)
+                        .requestMatchers(USER_URLS).hasAnyAuthority(ROLE_USER, ROLE_ADMIN)
+                        .requestMatchers("/auth/logout").authenticated()
+                        .anyRequest().denyAll()
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
@@ -72,25 +78,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowedOrigins(allowedOrigins);
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        int saltLength = 16;
-        int hashLength = 32;
-        int parallelism = 4;
-        int memory = 1 << 12;
-        int iterations = 3;
-        return new Argon2PasswordEncoder(saltLength, hashLength, parallelism, memory, iterations);
+        return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
     }
 }

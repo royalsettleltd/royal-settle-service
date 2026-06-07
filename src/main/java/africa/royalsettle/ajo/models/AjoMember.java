@@ -1,11 +1,9 @@
 package africa.royalsettle.ajo.models;
 
 import africa.royalsettle.common.dto.BaseEntity;
-import africa.royalsettle.onboarding.entity.Users;
+import africa.royalsettle.onboarding.models.Users;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -17,11 +15,9 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class AjoMember extends BaseEntity {
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "ajo_id")
     private Ajo ajo;
-
-    private int slotNo;
 
     private Integer payoutPosition;
 

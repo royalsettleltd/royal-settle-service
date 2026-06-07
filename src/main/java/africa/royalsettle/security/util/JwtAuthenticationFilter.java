@@ -1,5 +1,7 @@
-package africa.royalsettle.security;
+package africa.royalsettle.security.util;
 
+import africa.royalsettle.security.service.CustomUserDetailsService;
+import africa.royalsettle.security.service.RefreshSessionService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
     private final CustomUserDetailsService userDetailsService;
-    private final TokenBlacklistService tokenBlacklistService;
+    private final RefreshSessionService refreshSessionService;
     public static final String JWT_REQUEST_ATTRIBUTE = JwtAuthenticationFilter.class.getName() + ".JWT";
     private static final String BEARER = "Bearer ";
 
@@ -39,9 +41,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             extractJwtFromRequest(request)
                     .filter(StringUtils::hasText)
-                    .filter(jwt -> !tokenBlacklistService.isBlacklisted(jwt))
                     .filter(jwtTokenUtil::validateToken)
                     .filter(jwtTokenUtil::isAccessToken)
+                    .filter(jwt -> refreshSessionService.isActive(
+                            jwtTokenUtil.extractSessionId(jwt),
+                            jwtTokenUtil.extractUsername(jwt)
+                    ))
                     .ifPresent(jwt -> {
                         String username = jwtTokenUtil.extractUsername(jwt);
                         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -54,7 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         request.setAttribute(JWT_REQUEST_ATTRIBUTE, jwt);
                     });
         } catch (Exception ex) {
-            log.error("Could not set user authentication in security context", ex);
+            log.debug("Could not set user authentication in security context: {}", ex.getMessage());
         }
 
         filterChain.doFilter(request, response);

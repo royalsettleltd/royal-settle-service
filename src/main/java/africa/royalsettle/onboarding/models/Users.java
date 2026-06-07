@@ -1,6 +1,7 @@
-package africa.royalsettle.onboarding.entity;
+package africa.royalsettle.onboarding.models;
 
 import africa.royalsettle.common.dto.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,6 +37,7 @@ public class Users extends BaseEntity {
     private String lastName;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Column(nullable = false)

@@ -7,7 +7,7 @@ import africa.royalsettle.notification.service.SmsService;
 import africa.royalsettle.notification.dto.response.OtpResponse;
 import africa.royalsettle.notification.dto.request.OtpSendRequest;
 import africa.royalsettle.notification.dto.request.OtpVerifyRequest;
-import africa.royalsettle.notification.model.OtpToken;
+import africa.royalsettle.notification.models.OtpToken;
 import africa.royalsettle.notification.repository.OtpTokenRepository;
 import africa.royalsettle.notification.service.EmailTemplateService;
 import africa.royalsettle.notification.service.OtpService;
@@ -43,7 +43,6 @@ public class OtpServiceImpl implements OtpService {
         String recipient = validateRecipient(request.getNotificationType(), request.recipient());
         String otp = generateOtp();
 
-        otpTokenRepository.deleteByExpiresAtBefore(LocalDateTime.now());
         otpTokenRepository.deleteByNotificationTypeAndRecipient(request.getNotificationType(), recipient);
         otpTokenRepository.save(OtpToken.builder()
                 .notificationType(request.getNotificationType())

@@ -1,4 +1,4 @@
-package africa.royalsettle.notification.model;
+package africa.royalsettle.notification.models;
 
 import africa.royalsettle.common.dto.BaseEntity;
 import africa.royalsettle.notification.dto.enums.NotificationType;

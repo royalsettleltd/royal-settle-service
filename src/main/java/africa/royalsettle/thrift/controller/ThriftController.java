@@ -1,8 +1,7 @@
 package africa.royalsettle.thrift.controller;
 import africa.royalsettle.thrift.dto.*;
-import africa.royalsettle.thrift.model.BankPaymentNotification;
+import africa.royalsettle.thrift.models.BankPaymentNotification;
 import africa.royalsettle.thrift.service.ThriftPlanService;
-import jakarta.annotation.PostConstruct;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
