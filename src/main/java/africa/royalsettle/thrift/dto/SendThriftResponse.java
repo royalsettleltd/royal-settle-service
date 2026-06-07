@@ -10,14 +10,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public class SendThriftResponse {
     @Schema(example = "Transfer the amount using the supplied reference")
-    private String message;       // Instructions for user
+    private String message;
     @Schema(example = "RS-20260607-ABC123")
-    private String rsReference;     // Unique reference to include in bank transfer
+    private String rsReference;
     @Schema(example = "Royal Settle Bank")
-    private String bankName;      // Royalsettle bank name
+    private String bankName;
     @Schema(example = "0123456789")
-    private String accountNumber; // Royalsettle bank account
+    private String accountNumber;
     @Schema(example = "School Fees")
-    private String planName;      // Thrift plan name
-   // private String userName;
+    private String planName;
 }
