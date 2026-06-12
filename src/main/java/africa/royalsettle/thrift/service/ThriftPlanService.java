@@ -3,8 +3,10 @@ package africa.royalsettle.thrift.service;
 import africa.royalsettle.common.enums.ThriftContributionStatus;
 import africa.royalsettle.common.enums.TransactionStatus;
 import africa.royalsettle.common.enums.TransactionType;
+import africa.royalsettle.common.exception.BadRequestException;
 import africa.royalsettle.onboarding.models.Users;
 import africa.royalsettle.onboarding.repository.UsersRepository;
+import africa.royalsettle.security.service.CurrentUserService;
 import africa.royalsettle.thrift.dto.*;
 import africa.royalsettle.thrift.models.BankPaymentNotification;
 import africa.royalsettle.thrift.models.ThriftContribution;
@@ -14,33 +16,30 @@ import africa.royalsettle.thrift.repository.ThriftPlanRepository;
 import africa.royalsettle.transaction.model.Transaction;
 import africa.royalsettle.transaction.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+import static africa.royalsettle.common.util.PageableUtil.buildPageableObject;
+import static africa.royalsettle.common.util.TextUtils.generateCode;
+import static africa.royalsettle.thrift.dto.ThriftPlanResponse.mapToResponse;
+
 @Service
 @RequiredArgsConstructor
 public class ThriftPlanService {
-    @Autowired
-
     private final ThriftPlanRepository thriftPlanRepository;
-    @Autowired
-    private ThriftContributionRepository thriftContributionRepository;
-    @Autowired
-
-    private TransactionRepository transactionRepository;
+    private final ThriftContributionRepository thriftContributionRepository;
+    private final TransactionRepository transactionRepository;
+    private final CurrentUserService currentUserService;
     private final UsersRepository userRepository;
     private static final String BANK_NAME = "Royalsettle";
     private static final String ACCOUNT_NUMBER = "1234567890";
 
     public ThriftPlanResponse createThriftPlan(ThriftPlanRequest payload) {
-//The user should be the currently logged in user when auth is ready
-//        User user = userRepository.findById()
-//                .orElseThrow(() -> new RuntimeException("User not found"));
+        Users currentUser = currentUserService.getCurrentUser();
 
         ThriftPlan plan = new ThriftPlan();
         plan.setPlanName(payload.getPlanName());
@@ -52,7 +51,7 @@ public class ThriftPlanService {
             plan.setEndDate(payload.getEndDate());
         }
         plan.setDescription(payload.getDescription());
-        //   plan.setUser(user);
+        plan.setUser(currentUser);
         plan.setIsCompleted(false);
 
         ThriftPlan savedPlan = thriftPlanRepository.save(plan);
@@ -62,27 +61,26 @@ public class ThriftPlanService {
 
 
     public ThriftPlanResponse getThriftPlanById(Long planId) {
-
         ThriftPlan plan = thriftPlanRepository.findById(planId)
-                .orElseThrow(() -> new RuntimeException("Thrift plan not found"));
+                .orElseThrow(() -> new BadRequestException("Thrift plan not found"));
         return mapToResponse(plan);
     }
 
 
     public Page<ThriftPlanResponse> getAllThriftPlans(int page, int size) {
-        PageRequest request = PageRequest.of(page, size, Sort.by("startDate").descending());
+        Pageable request = buildPageableObject(page, size, Sort.by("startDate").descending());
 
         Page<ThriftPlan> plans = thriftPlanRepository.findAll(request);
-        return plans.map(this::mapToResponse);
+        return plans.map(ThriftPlanResponse::mapToResponse);
     }
 
     public SendThriftResponse sendThrift(SendThriftRequest request) {
 
-        Users user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Users user = userRepository.findByCode(request.getUserCode())
+                .orElseThrow(() -> new BadRequestException("User not found"));
 
-        ThriftPlan plan = thriftPlanRepository.findById(request.getThriftPlanId())
-                .orElseThrow(() -> new RuntimeException("Thrift plan not found"));
+        ThriftPlan plan = thriftPlanRepository.findByCode(request.getThriftCode())
+                .orElseThrow(() -> new BadRequestException("Thrift plan not found"));
 
         Transaction transaction = new Transaction();
         transaction.setUser(user);
@@ -114,18 +112,19 @@ public class ThriftPlanService {
     }
 
     private String generateUniqueReference() {
-        return "TTXN-" + System.currentTimeMillis();
+        return "TXN|".concat(generateCode());
     }
 
     public ReconcilePaymentResponse reconcileBankPayment(BankPaymentNotification notification) {
 
         Transaction transaction = transactionRepository
                 .findByRsReference(notification.getBankReference())
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+                .orElseThrow(() -> new BadRequestException("Transaction not found"));
+
         if (transaction.getStatus() == TransactionStatus.SUCCESS) {
             ThriftContribution contribution = thriftContributionRepository
                     .findByTransaction(transaction)
-                    .orElseThrow(() -> new RuntimeException("Contribution not found"));
+                    .orElseThrow(() -> new BadRequestException("Contribution not found"));
 
             ReconcilePaymentResponse response = new ReconcilePaymentResponse();
             response.setMessage("Payment already reconciled");
@@ -138,7 +137,7 @@ public class ThriftPlanService {
 
         // Verify amount
         if (transaction.getAmount().compareTo(notification.getAmount()) != 0) {
-            throw new RuntimeException("Payment amount mismatch");
+            throw new BadRequestException("Payment amount mismatch");
         }
 
         // Mark transaction SUCCESS
@@ -148,7 +147,7 @@ public class ThriftPlanService {
         // Mark contribution SUCCESS
         ThriftContribution contribution = thriftContributionRepository
                 .findByTransaction(transaction)
-                .orElseThrow(() -> new RuntimeException("Contribution not found"));
+                .orElseThrow(() -> new BadRequestException("Contribution not found"));
         contribution.setStatus(ThriftContributionStatus.SUCCESS);
         thriftContributionRepository.save(contribution);
 
@@ -160,33 +159,4 @@ public class ThriftPlanService {
 
         return response;
     }
-
-
-    private ThriftPlanResponse mapToResponse(ThriftPlan plan) {
-        ThriftPlanResponse response = new ThriftPlanResponse();
-        response.setPlanId(plan.getId());
-        response.setPlanName(plan.getPlanName());
-        response.setDescription(plan.getDescription());
-
-        //response.setUserFullName(plan.getUser().getFullName());
-        response.setPeriodicAmount(plan.getPeriodicContribution());
-        response.setTargetAmount(plan.getTargetAmount());
-        response.setStartDate(plan.getStartDate());
-        response.setEndDate(plan.getEndDate());
-        response.setCompleted(plan.getIsCompleted());
-
-        return response;
-    }
-
 }
-
-//        "planId": "5aae696d-adae-4a23-88e9-2b260dbfd156",
-//        "planName": "1m saving goal",
-//        "periodicContribution": null,
-//        "targetAmount": 1000000.00,
-//        "userFullName": null,
-//        "startDate": "2026-01-20T12:23:22.9002644",
-//        "endDate": null,
-//        "description": null,
-//        "totalContributed": null,
-//        "completed": false

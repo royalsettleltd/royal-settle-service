@@ -1,8 +1,9 @@
 package africa.royalsettle.thrift.dto;
 
+import africa.royalsettle.thrift.models.ThriftPlan;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,5 +31,22 @@ public class ThriftPlanResponse {
     private String description;
     @Schema(example = "false")
     private boolean isCompleted;
+
+
+    public static ThriftPlanResponse mapToResponse(ThriftPlan plan) {
+        ThriftPlanResponse response = new ThriftPlanResponse();
+        response.setPlanId(plan.getId());
+        response.setPlanName(plan.getPlanName());
+        response.setDescription(plan.getDescription());
+
+        response.setUserFullName(plan.getUser().getFullName());
+        response.setPeriodicAmount(plan.getPeriodicContribution());
+        response.setTargetAmount(plan.getTargetAmount());
+        response.setStartDate(plan.getStartDate());
+        response.setEndDate(plan.getEndDate());
+        response.setCompleted(plan.getIsCompleted());
+
+        return response;
+    }
 
 }
