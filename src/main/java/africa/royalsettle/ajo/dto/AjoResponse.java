@@ -3,14 +3,18 @@ package africa.royalsettle.ajo.dto;
 import africa.royalsettle.ajo.models.Ajo;
 import africa.royalsettle.common.enums.AjoStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Getter
 @Builder
 @Schema(description = "Ajo details")
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class AjoResponse {
 
     @Schema(description = "Internal public identifier", example = "20260611230636000A1B2C3D4")

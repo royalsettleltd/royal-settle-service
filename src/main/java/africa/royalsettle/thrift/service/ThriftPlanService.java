@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static africa.royalsettle.common.util.PageableUtil.buildPageableObject;
@@ -38,21 +39,20 @@ public class ThriftPlanService {
     private static final String BANK_NAME = "Royalsettle";
     private static final String ACCOUNT_NUMBER = "1234567890";
 
+
     public ThriftPlanResponse createThriftPlan(ThriftPlanRequest payload) {
         Users currentUser = currentUserService.getCurrentUser();
 
-        ThriftPlan plan = new ThriftPlan();
-        plan.setPlanName(payload.getPlanName());
-        plan.setPeriodicContribution(payload.getPeriodicAmount());
-        plan.setTargetAmount(payload.getTargetAmount());
-        plan.setStartDate(LocalDateTime.now());
-
-        if (payload.getEndDate() != null) {
-            plan.setEndDate(payload.getEndDate());
-        }
-        plan.setDescription(payload.getDescription());
-        plan.setUser(currentUser);
-        plan.setIsCompleted(false);
+        ThriftPlan plan = ThriftPlan.builder()
+                .planName(payload.getPlanName())
+                .periodicContribution(payload.getPeriodicAmount())
+                .targetAmount(payload.getTargetAmount())
+                .startDate(LocalDate.now())
+                .endDate(payload.getEndDate() != null ? payload.getEndDate() : null)
+                .description(payload.getDescription())
+                .user(currentUser)
+                .isCompleted(false)
+                .build();
 
         ThriftPlan savedPlan = thriftPlanRepository.save(plan);
 
@@ -82,33 +82,35 @@ public class ThriftPlanService {
         ThriftPlan plan = thriftPlanRepository.findByCode(request.getThriftCode())
                 .orElseThrow(() -> new BadRequestException("Thrift plan not found"));
 
-        Transaction transaction = new Transaction();
-        transaction.setUser(user);
-        transaction.setType(TransactionType.THRIFT_CONTRIBUTION);
-        transaction.setAmount(request.getAmount());
-        transaction.setStatus(TransactionStatus.PENDING);
-        transaction.setRsReference(generateUniqueReference());
+        Transaction transaction = Transaction.builder()
+                .user(user)
+                .type(TransactionType.THRIFT_CONTRIBUTION)
+                .amount(request.getAmount())
+                .status(TransactionStatus.PENDING)
+                .rsReference(generateUniqueReference())
+                .thriftPlan(plan)
+                .build();
 
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        ThriftContribution contribution = new ThriftContribution();
-        contribution.setAmount(request.getAmount());
-        contribution.setContributionDate(LocalDateTime.now());
-        contribution.setStatus(ThriftContributionStatus.PENDING);
-        contribution.setUser(user);
-        contribution.setThriftPlan(plan);
-        contribution.setTransaction(savedTransaction);
+        ThriftContribution contribution = ThriftContribution.builder()
+                .amount(request.getAmount())
+                .contributionDate(LocalDateTime.now())
+                .status(ThriftContributionStatus.PENDING)
+                .user(user)
+                .thriftPlan(plan)
+                .transaction(savedTransaction)
+                .build();
 
         thriftContributionRepository.save(contribution);
 
-        SendThriftResponse response = new SendThriftResponse();
-        response.setMessage("Please send the exact amount to the bank account below and include the reference provided.");
-        response.setRsReference(savedTransaction.getRsReference());
-        response.setBankName(BANK_NAME);
-        response.setAccountNumber(ACCOUNT_NUMBER);
-        response.setPlanName(plan.getPlanName());
-
-        return response;
+        return SendThriftResponse.builder()
+                .message("Please send the exact amount to the bank account below and include the reference provided.")
+                .rsReference(savedTransaction.getRsReference())
+                .bankName(BANK_NAME)
+                .accountNumber(ACCOUNT_NUMBER)
+                .planName(plan.getPlanName())
+                .build();
     }
 
     private String generateUniqueReference() {
@@ -134,24 +136,19 @@ public class ThriftPlanService {
             return response;
         }
 
-
-        // Verify amount
         if (transaction.getAmount().compareTo(notification.getAmount()) != 0) {
             throw new BadRequestException("Payment amount mismatch");
         }
 
-        // Mark transaction SUCCESS
         transaction.setStatus(TransactionStatus.SUCCESS);
         transactionRepository.save(transaction);
 
-        // Mark contribution SUCCESS
         ThriftContribution contribution = thriftContributionRepository
                 .findByTransaction(transaction)
                 .orElseThrow(() -> new BadRequestException("Contribution not found"));
         contribution.setStatus(ThriftContributionStatus.SUCCESS);
         thriftContributionRepository.save(contribution);
 
-        // Prepare response
         ReconcilePaymentResponse response = new ReconcilePaymentResponse();
         response.setMessage("Payment reconciled successfully");
         response.setTransactionStatus(transaction.getStatus().name());

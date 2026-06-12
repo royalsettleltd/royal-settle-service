@@ -1,5 +1,6 @@
 package africa.royalsettle.thrift.controller;
 
+import africa.royalsettle.common.anotations.WrapResponse;
 import africa.royalsettle.thrift.dto.*;
 import africa.royalsettle.thrift.models.BankPaymentNotification;
 import africa.royalsettle.thrift.service.ThriftPlanService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/thrift")
 @Tag(name = "Thrift", description = "Thrift plan, contribution, and reconciliation operations")
 @SecurityRequirement(name = "bearerAuth")
+@WrapResponse
 public class ThriftController {
     private final ThriftPlanService thriftPlanService;
 
