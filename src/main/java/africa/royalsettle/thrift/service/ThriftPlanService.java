@@ -88,6 +88,7 @@ public class ThriftPlanService {
                 .amount(request.getAmount())
                 .status(TransactionStatus.PENDING)
                 .rsReference(generateUniqueReference())
+                .thriftPlan(plan)
                 .build();
 
         Transaction savedTransaction = transactionRepository.save(transaction);
