@@ -13,7 +13,6 @@ import java.util.Optional;
 public interface AjoRepository extends JpaRepository<Ajo, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT a FROM Ajo a WHERE a.code = :code")
-    Optional<Ajo> findByCode(String code);
-
+    @Query("SELECT a FROM Ajo a WHERE a.ajoCode = :ajoCode")
+    Optional<Ajo> findByAjoCodeForUpdate(String ajoCode);
 }

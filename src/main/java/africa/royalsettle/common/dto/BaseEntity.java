@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static africa.royalsettle.common.constants.AppConstant.CODE_TIMESTAMP_FORMATTER;
+import static africa.royalsettle.common.util.TextUtils.generateCode;
 
 @ToString
 @MappedSuperclass
@@ -61,10 +62,5 @@ public class BaseEntity extends BaseEntityNoId {
                 .append(getCreatedOn())
                 .append(getLastModifiedOn())
                 .toHashCode();
-    }
-
-    private static String generateCode() {
-        return CODE_TIMESTAMP_FORMATTER.format(LocalDateTime.now())
-                + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
     }
 }
