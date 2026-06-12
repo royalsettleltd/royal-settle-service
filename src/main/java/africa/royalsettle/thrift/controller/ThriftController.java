@@ -49,8 +49,8 @@ public class ThriftController {
     @GetMapping("/getAllPlan")
     @Operation(summary = "List thrift plans")
     public ResponseEntity<Page<ThriftPlanResponse>> getAllThriftPlans(
-            @Parameter(description = "Zero-based page number", example = "0")
-            @RequestParam(defaultValue = "0") int page,
+            @Parameter(example = "1")
+            @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "Number of records per page", example = "10")
             @RequestParam(defaultValue = "10") int size
     ) {

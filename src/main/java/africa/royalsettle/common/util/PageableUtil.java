@@ -26,4 +26,13 @@ public class PageableUtil {
                 pageSize,
                 Sort.by(Sort.Direction.DESC, "id"));
     }
+
+    public static Pageable buildPageableObject(int pageNumber, int pageSize, Sort sort) {
+        validatePageRequest(pageNumber, pageSize);
+        return PageRequest.of(
+                pageNumber - 1,
+                pageSize,
+                sort
+        );
+    }
 }

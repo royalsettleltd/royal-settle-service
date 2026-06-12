@@ -37,16 +37,10 @@ public class ThriftPlan extends BaseEntity {
     @Column(name = "is_completed", nullable = false)
     private Boolean isCompleted;
 
-    @Column(name = "description", length = 255)
+    @Column(name = "description")
     private String description;
-
-    @OneToMany
-    private List<Transaction> transactions;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private Users user;  // Owner of the plan
-
-    @OneToMany(mappedBy = "thriftPlan", cascade = CascadeType.ALL)
-    private List<ThriftContribution> contributions;
+    private Users user;
 }

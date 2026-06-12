@@ -23,4 +23,6 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
             @Param("emailAddress") String emailAddress,
             @Param("phoneNumber") String phoneNumber
     );
+
+    Optional<Users> findByCode(String userCode);
 }
