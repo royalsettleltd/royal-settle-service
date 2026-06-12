@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class Ajo extends BaseEntity {
 
+    @Column(nullable = false, unique = true, length = 11)
     private String ajoCode;
 
     private String name;
@@ -32,6 +33,7 @@ public class Ajo extends BaseEntity {
 
     private String duration;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "initiator_id", nullable = false)
     private Users users;
 }

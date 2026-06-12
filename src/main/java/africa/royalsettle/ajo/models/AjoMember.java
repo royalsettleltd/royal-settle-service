@@ -8,15 +8,18 @@ import lombok.*;
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Table
+@Table(uniqueConstraints = @UniqueConstraint(
+        name = "uk_ajo_member_ajo_user",
+        columnNames = {"ajo_id", "user_id"}
+))
 @Entity
 @Builder
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class AjoMember extends BaseEntity {
 
-    @OneToOne
-    @JoinColumn(name = "ajo_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ajo_id", nullable = false)
     private Ajo ajo;
 
     private Integer payoutPosition;
@@ -25,7 +28,7 @@ public class AjoMember extends BaseEntity {
     @JoinColumn(name = "ajo_payout_id")
     private AjoPayout payout;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private Users users;
 }
