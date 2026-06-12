@@ -3,6 +3,7 @@ package africa.royalsettle.ajo.controller;
 import africa.royalsettle.ajo.dto.AjoResponse;
 import africa.royalsettle.ajo.dto.CreateAjoRequest;
 import africa.royalsettle.ajo.service.AjoService;
+import africa.royalsettle.common.anotations.WrapResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/ajo")
 @Tag(name = "Ajo", description = "Ajo creation, invitation, membership, and listing operations")
 @SecurityRequirement(name = "bearerAuth")
+@WrapResponse
 public class AjoController {
 
     private final AjoService ajoService;

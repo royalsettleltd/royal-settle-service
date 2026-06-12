@@ -2,13 +2,11 @@ package africa.royalsettle.thrift.models;
 
 import africa.royalsettle.common.dto.BaseEntity;
 import africa.royalsettle.onboarding.models.Users;
-import africa.royalsettle.transaction.model.Transaction;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -29,10 +27,10 @@ public class ThriftPlan extends BaseEntity {
     private BigDecimal periodicContribution;
 
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date")
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     @Column(name = "is_completed", nullable = false)
     private Boolean isCompleted;
