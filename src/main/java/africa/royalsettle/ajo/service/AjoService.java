@@ -96,7 +96,7 @@ public class AjoService {
 
         return "Successfully joined Ajo " + ajo.getName();
     }
-
+//Making a change.
     @Transactional(readOnly = true)
     public Page<AjoResponse> getAllMyAjos(int pageNumber, int pageSize) {
         Pageable pageable = buildPageableObject(pageNumber, pageSize);
