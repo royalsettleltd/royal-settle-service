@@ -17,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.env.Environment;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -46,6 +47,9 @@ class OtpServiceImplTest {
 
     @Mock
     private SmsService smsService;
+
+    @Mock
+    private Environment environment;
 
     @InjectMocks
     private OtpServiceImpl otpService;
@@ -90,6 +94,7 @@ class OtpServiceImplTest {
         verify(smsService, never()).sendSms(any());
         assertEquals("OTP sent successfully", response.getMessage());
         assertFalse(response.isVerified());
+        assertEquals(token.getOtp(), response.getOtp());
     }
 
     @Test
@@ -111,6 +116,22 @@ class OtpServiceImplTest {
         assertTrue(notification.getMessage().contains(tokenCaptor.getValue().getOtp()));
         verify(emailService, never()).send(any());
         assertFalse(response.isVerified());
+        assertEquals(tokenCaptor.getValue().getOtp(), response.getOtp());
+    }
+
+    @Test
+    void omitsOtpFromResponseInProd() {
+        when(environment.getActiveProfiles()).thenReturn(new String[]{"prod"});
+
+        OtpSendRequest request = new OtpSendRequest();
+        request.setNotificationType(NotificationType.SMS);
+        request.setPhoneNumber("+2348012345678");
+
+        OtpResponse response = otpService.sendOtp(request);
+
+        assertEquals("OTP sent successfully", response.getMessage());
+        assertFalse(response.isVerified());
+        assertEquals(null, response.getOtp());
     }
 
     @Test
