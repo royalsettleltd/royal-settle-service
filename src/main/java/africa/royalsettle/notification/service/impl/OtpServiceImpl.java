@@ -15,12 +15,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +36,7 @@ public class OtpServiceImpl implements OtpService {
     private final EmailService emailService;
     private final EmailTemplateService emailTemplateService;
     private final SmsService smsService;
+    private final Environment environment;
 
     @Value("${spring.mail.username:RoyalSettle}")
     private String emailSender;
@@ -56,6 +59,7 @@ public class OtpServiceImpl implements OtpService {
         return OtpResponse.builder()
                 .message("OTP sent successfully")
                 .verified(false)
+                .otp(isProdProfileActive() ? null : otp)
                 .build();
     }
 
@@ -110,4 +114,10 @@ public class OtpServiceImpl implements OtpService {
     private String generateOtp() {
         return String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
     }
+
+    private boolean isProdProfileActive() {
+        String[] activeProfiles = environment.getActiveProfiles();
+        return Arrays.asList(activeProfiles).contains("prod");
+    }
+
 }
