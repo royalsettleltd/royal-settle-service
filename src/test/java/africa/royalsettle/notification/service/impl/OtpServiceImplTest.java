@@ -17,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.env.Environment;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -24,10 +25,12 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,12 +50,16 @@ class OtpServiceImplTest {
     @Mock
     private SmsService smsService;
 
+    @Mock
+    private Environment environment;
+
     @InjectMocks
     private OtpServiceImpl otpService;
 
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(otpService, "emailSender", "noreply@royalsettle.africa");
+        lenient().when(environment.getActiveProfiles()).thenReturn(new String[]{"dev"});
     }
 
     @Test
@@ -90,6 +97,7 @@ class OtpServiceImplTest {
         verify(smsService, never()).sendSms(any());
         assertEquals("OTP sent successfully", response.getMessage());
         assertFalse(response.isVerified());
+        assertEquals(token.getOtp(), response.getOtp());
     }
 
     @Test
@@ -111,6 +119,7 @@ class OtpServiceImplTest {
         assertTrue(notification.getMessage().contains(tokenCaptor.getValue().getOtp()));
         verify(emailService, never()).send(any());
         assertFalse(response.isVerified());
+        assertEquals(tokenCaptor.getValue().getOtp(), response.getOtp());
     }
 
     @Test
@@ -177,5 +186,20 @@ class OtpServiceImplTest {
 
         assertEquals("emailAddress is required", exception.getMessage());
         verify(otpTokenRepository, never()).save(any());
+    }
+
+    @Test
+    void omitsOtpFromResponseInProd() {
+        when(environment.getActiveProfiles()).thenReturn(new String[]{"prod"});
+
+        OtpSendRequest request = new OtpSendRequest();
+        request.setNotificationType(NotificationType.SMS);
+        request.setPhoneNumber("+2348012345678");
+
+        OtpResponse response = otpService.sendOtp(request);
+
+        assertEquals("OTP sent successfully", response.getMessage());
+        assertFalse(response.isVerified());
+        assertNull(response.getOtp());
     }
 }
