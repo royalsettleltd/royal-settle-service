@@ -1,6 +1,8 @@
 package africa.royalsettle.onboarding.service.impl;
 
 import africa.royalsettle.common.exception.BadRequestException;
+import africa.royalsettle.onboarding.dto.SetCustomerPinRequest;
+import africa.royalsettle.onboarding.dto.SetCustomerPinResponse;
 import africa.royalsettle.onboarding.dto.SignupRequest;
 import africa.royalsettle.onboarding.dto.SignupResponse;
 import africa.royalsettle.onboarding.models.UserRole;
@@ -9,6 +11,7 @@ import africa.royalsettle.onboarding.enums.RoleName;
 import africa.royalsettle.onboarding.repository.UserContactProjection;
 import africa.royalsettle.onboarding.repository.UsersRepository;
 import africa.royalsettle.onboarding.service.OnboardingService;
+import africa.royalsettle.security.service.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +26,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CurrentUserService currentUserService;
 
 
     @Override
@@ -67,6 +71,23 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .emailAddress(savedUser.getEmailAddress())
                 .phoneNumber(savedUser.getPhoneNumber())
                 .referralCode(savedUser.getReferralCode())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public SetCustomerPinResponse setupPin(SetCustomerPinRequest request) {
+        if (!request.getPin().equals(request.getConfirmPin())) {
+            throw new BadRequestException("pin and confirmPin do not match");
+        }
+
+        Users currentUser = currentUserService.getCurrentUser();
+        currentUser.setTransactionPin(passwordEncoder.encode(request.getPin()));
+        Users savedUser = usersRepository.save(currentUser);
+
+        return SetCustomerPinResponse.builder()
+                .code(savedUser.getCode())
+                .message("Transaction PIN set successfully")
                 .build();
     }
 }

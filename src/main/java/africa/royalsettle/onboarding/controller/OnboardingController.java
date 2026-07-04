@@ -1,6 +1,8 @@
 package africa.royalsettle.onboarding.controller;
 
 import africa.royalsettle.common.anotations.WrapResponse;
+import africa.royalsettle.onboarding.dto.SetCustomerPinRequest;
+import africa.royalsettle.onboarding.dto.SetCustomerPinResponse;
 import africa.royalsettle.onboarding.dto.SignupRequest;
 import africa.royalsettle.onboarding.dto.SignupResponse;
 import africa.royalsettle.onboarding.service.OnboardingService;
@@ -43,5 +45,23 @@ public class OnboardingController {
     })
     public SignupResponse signup(@Valid @RequestBody SignupRequest request) {
         return onboardingService.signup(request);
+    }
+
+    @PostMapping("/setup-pin")
+    @Operation(
+            summary = "Set up customer transaction PIN",
+            description = "Sets or updates the authenticated customer's transaction PIN."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "PIN set",
+                    content = @Content(schema = @Schema(implementation = SetCustomerPinResponse.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Validation error or PIN mismatch"),
+            @ApiResponse(responseCode = "401", description = "Authentication required")
+    })
+    public SetCustomerPinResponse setupPin(@Valid @RequestBody SetCustomerPinRequest request) {
+        return onboardingService.setupPin(request);
     }
 }
