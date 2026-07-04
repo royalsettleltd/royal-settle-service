@@ -26,7 +26,8 @@ public class AppConstant {
 
     public static final String[] USER_URLS = {
             "/thrift/**",
-            "/ajo/**"
+            "/ajo/**",
+            "/customer/**"
     };
     public static final String ROLE_ADMIN = "ROYALSETTLE_ADMIN";
     public static final String ROLE_USER = "ROYALSETTLE_USER";

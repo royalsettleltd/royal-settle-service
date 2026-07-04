@@ -1,12 +1,15 @@
 package africa.royalsettle.onboarding.service.impl;
 
 import africa.royalsettle.common.exception.BadRequestException;
+import africa.royalsettle.onboarding.dto.SetCustomerPinRequest;
+import africa.royalsettle.onboarding.dto.SetCustomerPinResponse;
 import africa.royalsettle.onboarding.dto.SignupRequest;
 import africa.royalsettle.onboarding.dto.SignupResponse;
 import africa.royalsettle.onboarding.enums.RoleName;
 import africa.royalsettle.onboarding.models.Users;
 import africa.royalsettle.onboarding.repository.UserContactProjection;
 import africa.royalsettle.onboarding.repository.UsersRepository;
+import africa.royalsettle.security.service.CurrentUserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -33,6 +36,9 @@ class OnboardingServiceImplTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private CurrentUserService currentUserService;
 
     @InjectMocks
     private OnboardingServiceImpl onboardingService;
@@ -90,6 +96,45 @@ class OnboardingServiceImplTest {
     }
 
     @Test
+    void setsEncodedTransactionPinForCurrentUser() {
+        SetCustomerPinRequest request = pinRequest("1234", "1234");
+        Users user = Users.builder()
+                .username("user@example.com")
+                .fullName("John Doe")
+                .emailAddress("user@example.com")
+                .phoneNumber("+2348012345678")
+                .referralCode("REF-001")
+                .password("encoded-password")
+                .build();
+
+        when(currentUserService.getCurrentUser()).thenReturn(user);
+        when(passwordEncoder.encode("1234")).thenReturn("encoded-pin");
+        when(usersRepository.save(user)).thenReturn(user);
+
+        SetCustomerPinResponse response = onboardingService.setupPin(request);
+
+        assertEquals("encoded-pin", user.getTransactionPin());
+        assertEquals(user.getCode(), response.getCode());
+        assertEquals("Transaction PIN set successfully", response.getMessage());
+        verify(usersRepository).save(user);
+    }
+
+    @Test
+    void rejectsMismatchedPinConfirmation() {
+        SetCustomerPinRequest request = pinRequest("1234", "4321");
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> onboardingService.setupPin(request)
+        );
+
+        assertEquals("pin and confirmPin do not match", exception.getMessage());
+        verify(currentUserService, never()).getCurrentUser();
+        verify(passwordEncoder, never()).encode(any());
+        verify(usersRepository, never()).save(any());
+    }
+
+    @Test
     void rejectsExistingPhoneNumberFromSingleConflictLookup() {
         SignupRequest request = signupRequest();
         UserContactProjection conflict = contact(
@@ -119,6 +164,13 @@ class OnboardingServiceImplTest {
         request.setPhoneNumber(" +2348012345678 ");
         request.setPassword("password123");
         request.setReferralCode(" REF-001 ");
+        return request;
+    }
+
+    private SetCustomerPinRequest pinRequest(String pin, String confirmPin) {
+        SetCustomerPinRequest request = new SetCustomerPinRequest();
+        request.setPin(pin);
+        request.setConfirmPin(confirmPin);
         return request;
     }
 

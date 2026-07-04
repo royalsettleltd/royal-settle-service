@@ -40,6 +40,9 @@ public class Users extends BaseEntity {
     @JsonIgnore
     private String password;
 
+    @JsonIgnore
+    private String transactionPin;
+
     @Column(nullable = false)
     @Builder.Default
     private boolean enabled = true;
