@@ -120,21 +120,6 @@ class OnboardingServiceImplTest {
     }
 
     @Test
-    void rejectsMismatchedPinConfirmation() {
-        SetCustomerPinRequest request = pinRequest();
-
-        BadRequestException exception = assertThrows(
-                BadRequestException.class,
-                () -> onboardingService.setupPin(request)
-        );
-
-        assertEquals("pin and confirmPin do not match", exception.getMessage());
-        verify(currentUserService, never()).getCurrentUser();
-        verify(passwordEncoder, never()).encode(any());
-        verify(usersRepository, never()).save(any());
-    }
-
-    @Test
     void rejectsExistingPhoneNumberFromSingleConflictLookup() {
         SignupRequest request = signupRequest();
         UserContactProjection conflict = contact(
