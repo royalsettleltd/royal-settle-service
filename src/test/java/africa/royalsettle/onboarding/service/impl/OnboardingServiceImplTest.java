@@ -97,7 +97,7 @@ class OnboardingServiceImplTest {
 
     @Test
     void setsEncodedTransactionPinForCurrentUser() {
-        SetCustomerPinRequest request = pinRequest("1234", "1234");
+        SetCustomerPinRequest request = pinRequest();
         Users user = Users.builder()
                 .username("user@example.com")
                 .fullName("John Doe")
@@ -117,21 +117,6 @@ class OnboardingServiceImplTest {
         assertEquals(user.getCode(), response.getCode());
         assertEquals("Transaction PIN set successfully", response.getMessage());
         verify(usersRepository).save(user);
-    }
-
-    @Test
-    void rejectsMismatchedPinConfirmation() {
-        SetCustomerPinRequest request = pinRequest("1234", "4321");
-
-        BadRequestException exception = assertThrows(
-                BadRequestException.class,
-                () -> onboardingService.setupPin(request)
-        );
-
-        assertEquals("pin and confirmPin do not match", exception.getMessage());
-        verify(currentUserService, never()).getCurrentUser();
-        verify(passwordEncoder, never()).encode(any());
-        verify(usersRepository, never()).save(any());
     }
 
     @Test
@@ -167,10 +152,9 @@ class OnboardingServiceImplTest {
         return request;
     }
 
-    private SetCustomerPinRequest pinRequest(String pin, String confirmPin) {
+    private SetCustomerPinRequest pinRequest() {
         SetCustomerPinRequest request = new SetCustomerPinRequest();
-        request.setPin(pin);
-        request.setConfirmPin(confirmPin);
+        request.setPin("1234");
         return request;
     }
 

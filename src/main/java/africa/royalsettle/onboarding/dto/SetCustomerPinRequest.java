@@ -13,9 +13,4 @@ public class SetCustomerPinRequest {
     @Pattern(regexp = "^\\d{4}$", message = "pin must be exactly 4 digits")
     @Schema(example = "1234", format = "password", minLength = 4, maxLength = 4)
     private String pin;
-
-    @NotBlank(message = "confirmPin is required")
-    @Pattern(regexp = "^\\d{4}$", message = "confirmPin must be exactly 4 digits")
-    @Schema(example = "1234", format = "password", minLength = 4, maxLength = 4)
-    private String confirmPin;
 }

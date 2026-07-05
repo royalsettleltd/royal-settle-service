@@ -77,10 +77,6 @@ public class OnboardingServiceImpl implements OnboardingService {
     @Override
     @Transactional
     public SetCustomerPinResponse setupPin(SetCustomerPinRequest request) {
-        if (!request.getPin().equals(request.getConfirmPin())) {
-            throw new BadRequestException("pin and confirmPin do not match");
-        }
-
         Users currentUser = currentUserService.getCurrentUser();
         currentUser.setTransactionPin(passwordEncoder.encode(request.getPin()));
         Users savedUser = usersRepository.save(currentUser);
