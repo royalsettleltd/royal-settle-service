@@ -97,7 +97,7 @@ class OnboardingServiceImplTest {
 
     @Test
     void setsEncodedTransactionPinForCurrentUser() {
-        SetCustomerPinRequest request = pinRequest("1234", "1234");
+        SetCustomerPinRequest request = pinRequest();
         Users user = Users.builder()
                 .username("user@example.com")
                 .fullName("John Doe")
@@ -121,7 +121,7 @@ class OnboardingServiceImplTest {
 
     @Test
     void rejectsMismatchedPinConfirmation() {
-        SetCustomerPinRequest request = pinRequest("1234", "4321");
+        SetCustomerPinRequest request = pinRequest();
 
         BadRequestException exception = assertThrows(
                 BadRequestException.class,
@@ -167,10 +167,9 @@ class OnboardingServiceImplTest {
         return request;
     }
 
-    private SetCustomerPinRequest pinRequest(String pin, String confirmPin) {
+    private SetCustomerPinRequest pinRequest() {
         SetCustomerPinRequest request = new SetCustomerPinRequest();
-        request.setPin(pin);
-        request.setConfirmPin(confirmPin);
+        request.setPin("1234");
         return request;
     }
 
