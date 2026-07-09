@@ -36,9 +36,19 @@ class OpenApiEndpointTest {
                 .getContentAsString();
 
         JsonNode openApi = objectMapper.readTree(document);
+        assertBearerSecurity(openApi, "/customer/setup-pin", "post");
         assertErrorResponseCode(openApi, "/auth/refresh-token", "post", "400", "400000");
         assertErrorResponseCode(openApi, "/thrift/create", "post", "403", "403000");
         assertErrorResponseCode(openApi, "/auth/refresh-token", "post", "500", "500000");
+    }
+
+    private void assertBearerSecurity(JsonNode openApi, String path, String method) {
+        JsonNode security = openApi.path("paths")
+                .path(path)
+                .path(method)
+                .path("security");
+
+        assertThat(security.toString()).contains("\"bearerAuth\"");
     }
 
     private void assertErrorResponseCode(
