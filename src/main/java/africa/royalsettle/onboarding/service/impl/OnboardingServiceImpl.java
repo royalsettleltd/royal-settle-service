@@ -1,15 +1,13 @@
 package africa.royalsettle.onboarding.service.impl;
 
 import africa.royalsettle.common.exception.BadRequestException;
-import africa.royalsettle.onboarding.dto.SetCustomerPinRequest;
-import africa.royalsettle.onboarding.dto.SetCustomerPinResponse;
-import africa.royalsettle.onboarding.dto.SignupRequest;
-import africa.royalsettle.onboarding.dto.SignupResponse;
+import africa.royalsettle.onboarding.dto.*;
 import africa.royalsettle.onboarding.models.UserRole;
 import africa.royalsettle.onboarding.models.Users;
 import africa.royalsettle.onboarding.enums.RoleName;
 import africa.royalsettle.onboarding.repository.UserContactProjection;
 import africa.royalsettle.onboarding.repository.UsersRepository;
+import africa.royalsettle.onboarding.service.AuthenticationService;
 import africa.royalsettle.onboarding.service.OnboardingService;
 import africa.royalsettle.security.service.CurrentUserService;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +25,12 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
     private final CurrentUserService currentUserService;
+    private final AuthenticationService authenticationService;
 
 
     @Override
     @Transactional
-    public SignupResponse signup(SignupRequest request) {
+    public LoginResponse signup(SignupRequest request) {
         String emailAddress = request.getEmailAddress().trim().toLowerCase();
         String phoneNumber = request.getPhoneNumber().trim();
 
@@ -64,14 +63,18 @@ public class OnboardingServiceImpl implements OnboardingService {
         user.getRoles().add(role);
 
         Users savedUser = usersRepository.save(user);
-
-        return SignupResponse.builder()
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setPassword(request.getPassword());
+        loginRequest.setUsername(emailAddress);
+        LoginResponse response = authenticationService.login(loginRequest);
+        var userDetails = SignupResponse.builder()
                 .code(savedUser.getCode())
                 .fullName(savedUser.getFullName())
                 .emailAddress(savedUser.getEmailAddress())
                 .phoneNumber(savedUser.getPhoneNumber())
-                .referralCode(savedUser.getReferralCode())
                 .build();
+        response.setUserDetails(userDetails);
+        return response;
     }
 
     @Override

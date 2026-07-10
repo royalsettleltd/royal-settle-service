@@ -1,14 +1,12 @@
 package africa.royalsettle.onboarding.service.impl;
 
 import africa.royalsettle.common.exception.BadRequestException;
-import africa.royalsettle.onboarding.dto.SetCustomerPinRequest;
-import africa.royalsettle.onboarding.dto.SetCustomerPinResponse;
-import africa.royalsettle.onboarding.dto.SignupRequest;
-import africa.royalsettle.onboarding.dto.SignupResponse;
+import africa.royalsettle.onboarding.dto.*;
 import africa.royalsettle.onboarding.enums.RoleName;
 import africa.royalsettle.onboarding.models.Users;
 import africa.royalsettle.onboarding.repository.UserContactProjection;
 import africa.royalsettle.onboarding.repository.UsersRepository;
+import africa.royalsettle.onboarding.service.AuthenticationService;
 import africa.royalsettle.security.service.CurrentUserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +38,9 @@ class OnboardingServiceImplTest {
     @Mock
     private CurrentUserService currentUserService;
 
+    @Mock
+    private AuthenticationService authenticationService;
+
     @InjectMocks
     private OnboardingServiceImpl onboardingService;
 
@@ -52,12 +53,24 @@ class OnboardingServiceImplTest {
         )).thenReturn(List.of());
         when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
         when(usersRepository.save(any(Users.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(authenticationService.login(any(LoginRequest.class))).thenReturn(
+                LoginResponse.builder()
+                        .username("user@example.com")
+                        .accessToken("access-token")
+                        .refreshToken("refresh-token")
+                        .tokenType("Bearer")
+                        .build()
+        );
 
-        SignupResponse response = onboardingService.signup(request);
+        LoginResponse response = onboardingService.signup(request);
 
         ArgumentCaptor<Users> userCaptor = ArgumentCaptor.forClass(Users.class);
+        ArgumentCaptor<LoginRequest> loginRequestCaptor = ArgumentCaptor.forClass(LoginRequest.class);
         verify(usersRepository).save(userCaptor.capture());
+        verify(authenticationService).login(loginRequestCaptor.capture());
         Users savedUser = userCaptor.getValue();
+        LoginRequest loginRequest = loginRequestCaptor.getValue();
+        var userDetails = response.getUserDetails();
 
         assertEquals("user@example.com", savedUser.getUsername());
         assertEquals("user@example.com", savedUser.getEmailAddress());
@@ -69,8 +82,15 @@ class OnboardingServiceImplTest {
         assertEquals(1, savedUser.getRoles().size());
         assertEquals(RoleName.ROYALSETTLE_USER, savedUser.getRoles().iterator().next().getName());
         assertEquals(savedUser, savedUser.getRoles().iterator().next().getUser());
-        assertEquals(savedUser.getCode(), response.getCode());
-        assertEquals("John Doe", response.getFullName());
+        assertEquals("user@example.com", loginRequest.getUsername());
+        assertEquals("password123", loginRequest.getPassword());
+        assertEquals("access-token", response.getAccessToken());
+        assertEquals("refresh-token", response.getRefreshToken());
+        assertEquals("Bearer", response.getTokenType());
+        assertEquals(savedUser.getCode(), userDetails.getCode());
+        assertEquals("John Doe", userDetails.getFullName());
+        assertEquals("user@example.com", userDetails.getEmailAddress());
+        assertEquals("+2348012345678", userDetails.getPhoneNumber());
     }
 
     @Test
