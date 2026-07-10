@@ -16,6 +16,5 @@ public class SignupResponse {
     private String emailAddress;
     @Schema(example = "+2348012345678")
     private String phoneNumber;
-    @Schema(example = "REF-001", nullable = true)
-    private String referralCode;
+
 }

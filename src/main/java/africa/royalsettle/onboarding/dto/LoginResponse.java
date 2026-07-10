@@ -1,5 +1,6 @@
 package africa.royalsettle.onboarding.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Data
 @Builder
 @Schema(description = "Issued JWT token pair")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginResponse {
     @Schema(description = "Authenticated username", example = "user@example.com")
     private String username;
@@ -16,4 +18,5 @@ public class LoginResponse {
     private String refreshToken;
     @Schema(description = "Authorization scheme", example = "Bearer")
     private String tokenType;
+    private SignupResponse userDetails;
 }

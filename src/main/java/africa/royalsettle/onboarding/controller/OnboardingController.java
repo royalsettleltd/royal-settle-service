@@ -1,10 +1,7 @@
 package africa.royalsettle.onboarding.controller;
 
 import africa.royalsettle.common.anotations.WrapResponse;
-import africa.royalsettle.onboarding.dto.SetCustomerPinRequest;
-import africa.royalsettle.onboarding.dto.SetCustomerPinResponse;
-import africa.royalsettle.onboarding.dto.SignupRequest;
-import africa.royalsettle.onboarding.dto.SignupResponse;
+import africa.royalsettle.onboarding.dto.*;
 import africa.royalsettle.onboarding.service.OnboardingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -44,7 +41,7 @@ public class OnboardingController {
             ),
             @ApiResponse(responseCode = "400", description = "Validation error or duplicate customer")
     })
-    public SignupResponse signup(@Valid @RequestBody SignupRequest request) {
+    public LoginResponse signup(@Valid @RequestBody SignupRequest request) {
         return onboardingService.signup(request);
     }
 
