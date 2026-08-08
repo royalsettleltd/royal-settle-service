@@ -2,6 +2,8 @@ package africa.royalsettle.onboarding.service.impl;
 
 import africa.royalsettle.common.exception.BadRequestException;
 import africa.royalsettle.onboarding.dto.*;
+import africa.royalsettle.onboarding.models.Users;
+import africa.royalsettle.onboarding.repository.UsersRepository;
 import africa.royalsettle.onboarding.service.AuthenticationService;
 import africa.royalsettle.security.service.CustomUserDetailsService;
 import africa.royalsettle.security.util.JwtAuthenticationFilter;
@@ -27,6 +29,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtTokenUtil jwtTokenUtil;
     private final CustomUserDetailsService userDetailsService;
     private final RefreshSessionService refreshSessionService;
+    private final UsersRepository usersRepository;
 
     @Override
     @Transactional
@@ -45,6 +48,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         );
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        Users user = usersRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new BadRequestException("User not found"));
         String sessionId = UUID.randomUUID().toString();
         String accessToken = jwtTokenUtil.generateToken(userDetails, sessionId);
         String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails, sessionId);
@@ -60,6 +65,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
+                .userDetails(toUserDetailsResponse(user))
                 .build();
     }
 
@@ -74,6 +80,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         String username = jwtTokenUtil.extractUsername(refreshToken);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        Users user = usersRepository.findByUsername(username)
+                .orElseThrow(() -> new BadRequestException("User not found"));
 
         if (!jwtTokenUtil.validateToken(refreshToken, userDetails)) {
             throw new BadRequestException("Invalid refresh token");
@@ -100,6 +108,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .tokenType("Bearer")
+                .userDetails(toUserDetailsResponse(user))
+                .build();
+    }
+
+    private UserDetailsResponse toUserDetailsResponse(Users user) {
+        return UserDetailsResponse.builder()
+                .code(user.getCode())
+                .fullName(user.getFullName())
+                .emailAddress(user.getEmailAddress())
+                .phoneNumber(user.getPhoneNumber())
                 .build();
     }
 

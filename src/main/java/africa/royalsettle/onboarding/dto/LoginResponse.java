@@ -18,5 +18,6 @@ public class LoginResponse {
     private String refreshToken;
     @Schema(description = "Authorization scheme", example = "Bearer")
     private String tokenType;
-    private SignupResponse userDetails;
+    @Schema(description = "Authenticated customer profile")
+    private UserDetailsResponse userDetails;
 }

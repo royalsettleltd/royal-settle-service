@@ -6,6 +6,8 @@ import africa.royalsettle.onboarding.dto.LoginResponse;
 import africa.royalsettle.onboarding.dto.LogoutRequest;
 import africa.royalsettle.onboarding.dto.LogoutResponse;
 import africa.royalsettle.onboarding.dto.RefreshTokenRequest;
+import africa.royalsettle.onboarding.models.Users;
+import africa.royalsettle.onboarding.repository.UsersRepository;
 import africa.royalsettle.security.service.CustomUserDetailsService;
 import africa.royalsettle.security.service.RefreshSessionService;
 import africa.royalsettle.security.util.JwtAuthenticationFilter;
@@ -26,6 +28,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -52,6 +55,9 @@ class AuthenticationServiceImplTest {
     private RefreshSessionService refreshSessionService;
 
     @Mock
+    private UsersRepository usersRepository;
+
+    @Mock
     private HttpServletRequest httpServletRequest;
 
     @Mock
@@ -72,6 +78,7 @@ class AuthenticationServiceImplTest {
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(userDetails);
+        when(usersRepository.findByUsername("user@example.com")).thenReturn(Optional.of(user()));
         when(jwtTokenUtil.generateToken(eq(userDetails), anyString())).thenReturn("access-token");
         when(jwtTokenUtil.generateRefreshToken(eq(userDetails), anyString())).thenReturn("refresh-token");
         when(jwtTokenUtil.extractTokenId("refresh-token")).thenReturn("refresh-token-id");
@@ -129,6 +136,7 @@ class AuthenticationServiceImplTest {
         when(jwtTokenUtil.isRefreshToken("old-refresh-token")).thenReturn(true);
         when(jwtTokenUtil.extractUsername("old-refresh-token")).thenReturn("user@example.com");
         when(userDetailsService.loadUserByUsername("user@example.com")).thenReturn(userDetails);
+        when(usersRepository.findByUsername("user@example.com")).thenReturn(Optional.of(user()));
         when(jwtTokenUtil.validateToken("old-refresh-token", userDetails)).thenReturn(true);
         when(jwtTokenUtil.extractSessionId("old-refresh-token")).thenReturn("session-id");
         when(jwtTokenUtil.generateToken(userDetails, "session-id")).thenReturn("new-access-token");
@@ -185,6 +193,7 @@ class AuthenticationServiceImplTest {
         when(jwtTokenUtil.isRefreshToken("refresh-token")).thenReturn(true);
         when(jwtTokenUtil.extractUsername("refresh-token")).thenReturn("user@example.com");
         when(userDetailsService.loadUserByUsername("user@example.com")).thenReturn(userDetails);
+        when(usersRepository.findByUsername("user@example.com")).thenReturn(Optional.of(user()));
         when(jwtTokenUtil.validateToken("refresh-token", userDetails)).thenReturn(true);
         when(jwtTokenUtil.extractSessionId("refresh-token")).thenReturn("session-id");
         when(jwtTokenUtil.generateToken(userDetails, "session-id")).thenReturn("new-access-token");
@@ -252,5 +261,14 @@ class AuthenticationServiceImplTest {
                 "encoded-password",
                 AuthorityUtils.createAuthorityList("ROYALSETTLE_USER")
         );
+    }
+
+    private Users user() {
+        return Users.builder()
+                .username("user@example.com")
+                .fullName("John Doe")
+                .emailAddress("user@example.com")
+                .phoneNumber("+2348012345678")
+                .build();
     }
 }
