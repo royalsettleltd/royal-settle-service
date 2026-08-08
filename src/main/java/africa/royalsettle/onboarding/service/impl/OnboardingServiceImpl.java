@@ -67,7 +67,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         loginRequest.setPassword(request.getPassword());
         loginRequest.setUsername(emailAddress);
         LoginResponse response = authenticationService.login(loginRequest);
-        var userDetails = SignupResponse.builder()
+        var userDetails = UserDetailsResponse.builder()
                 .code(savedUser.getCode())
                 .fullName(savedUser.getFullName())
                 .emailAddress(savedUser.getEmailAddress())
